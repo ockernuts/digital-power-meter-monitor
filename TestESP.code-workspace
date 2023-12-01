@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "../TestESP"
+		},
+		{
+			"name": "DigitaleMeterMonitor",
+			"path": "../DigitaleMeterMonitor"
+		},
+		{
+			"name": "DigitaleMeterMon32",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp",
+			"list": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"random": "cpp",
+			"regex": "cpp",
+			"ranges": "cpp",
+			"numeric": "cpp",
+			"fstream": "cpp",
+			"atomic": "cpp",
+			"sstream": "cpp"
+		}
+	}
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Digitale Meter Monitor - Telegram setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div class="topnav">
+    <h1>Digitale Meter Monitor - Telegram setup</h1>
+  </div>
+  <div class="content">
+    <div class="card-grid">
+      <div class="card">
+        <form action="/config" method="POST">
+          <p>
+            <label for="ssid">Telegram bot token</label>
+            <input type="text" id ="token" name="token" value="%TOKEN%"><br>
+            <label for="pass">UserId 1</label>
+            <input type="text" id ="userid1" name="userid1" value="%USERID1%"><br>
+            <label for="pass">UserId 2</label>
+            <input type="text" id ="userid1" name="userid2" value="%USERID2%"><br>
+            <label for="pass">UserId 3</label>
+            <input type="text" id ="userid3" name="userid3" value="%USERID3%"><br>
+            <label for="pass">UserId 4</label>
+            <input type="text" id ="userid4" name="userid4" value="%USERID4%"><br>
+            <label for="ip">Alarm niveau (Watt)</label>
+            <input type="text" id ="alarmwatts" name="alarmwatts" value="%ALARMWATTS%"><br>
+            <input type ="submit" value ="Submit">
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

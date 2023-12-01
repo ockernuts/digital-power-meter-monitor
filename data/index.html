@@ -1,0 +1,517 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="dark-unica.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+  <style>
+    html {
+      font-family: Verdana, sans-serif; 
+      display: inline-block; 
+      text-align: center;
+      font-size: 16px
+    }
+    body {
+      font-family: Verdana;
+      min-width: 250px; 
+    	height: 400px;
+      margin: 0 auto;
+      background-color: black;
+      color: white
+    }
+    h2 {
+      font-family: Verdana;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+    h3 {
+      font-family: Verdana;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+    button {
+      background: #737375;
+      border-radius: 999px;
+      box-shadow: #484849 0 4px 8px -4px;
+      box-sizing: border-box;
+      color: #FFFFFF;
+      cursor: pointer;
+      font-family: Verdana,sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 20px;
+      opacity: 1;
+      outline: 0 solid transparent;
+      padding: 4px 9px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      width: fit-content;
+      word-break: break-word;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Digitale Meter Monitor</h2>
+  
+  <h3><span id="current_quarter_title"></span></h3>
+  <tr></tr>
+  <div id="chart-watts" class="container"></div>
+  <br>
+  <p style="text-align: center;">
+  <button id="previous_day_button" onclick="showPreviousDay()">&lt;&lt;</button>
+  <button id="previous_quarter_button" onclick="showPreviousQuarter()">&lt; 15'</button>
+  <button id="current_quarter_button" onclick="showCurrentQuarter()"> Nu </button>
+  <button id="next_quarter_button" onclick="showNextQuarter()">15' &gt;</button>
+  <button id="next_day_button" onclick="showNextDay()">&gt;&gt;</button>
+  <p>
+    <button id="month_peak_details_button" onclick="showMonthPeak()">
+      Maand piek </label><span id="month_quarter_peak_power"> ? </span><label> Watt </label>
+    </button>
+  </p>
+</body>
+<script>
+
+// TODO:
+// Disable forward / backward buttons when not applicable 
+// Foresee 1h / 1day back/ forward buttons. 
+
+const dateTimeLang = "NL-be"
+
+const data_format_options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+
+function capitalizeFirst(some_text) {
+  return some_text.charAt(0).toUpperCase() + some_text.slice(1);
+}
+function formatDateTime(datetime) {
+  return capitalizeFirst(datetime.toLocaleDateString(dateTimeLang, data_format_options)) + " "+  datetime.toLocaleTimeString(dateTimeLang);
+}
+
+function quarterIdToDateTime(quarter_id) {
+  // Note QuarterID is a local time encoded quarter start ....
+  var year = 2000 + ((quarter_id & 0xFF000000) >>> 24);
+  var month = (quarter_id & 0x00FF0000) >>> 16;
+  var day = (quarter_id & 0x0000FF00) >>> 8;
+  var quarter_in_the_day = quarter_id & 0x0000007F; // 7F due to highest bit == Summer time indication....
+  var is_summer_time = quarter_id & 0x80 ? 1 : 0;
+  // Hour is set back to match UTC from Europe CET Time
+  var hour = (quarter_in_the_day >>> 2) -1 -1 * is_summer_time ;
+  var quarter = quarter_in_the_day & 0x03; // last 2 bits 0..3 for the quarter
+  var quarter_date_time = new Date(Date.UTC(year, month -1, day, hour , quarter * 15, 0, 0));
+  return quarter_date_time;
+}
+
+function dateTimeToQuarterId(quarter_date_time) {
+  var year = quarter_date_time.getFullYear() - 2000; // 0..255 is coverred only...will do. 
+  var month = quarter_date_time.getMonth() + 1; // 1..12
+  var day = quarter_date_time.getDate(); // 1..31
+  var is_summer_time = quarter_date_time.getTimezoneOffset() == -120 ? true : false; // In Summer time we are 2 hours before the sun.  
+  var quarter_in_the_day = Math.floor((quarter_date_time.getHours() * 60 + quarter_date_time.getMinutes())/15); // 0..95 
+  var quarter_id = (year << 24) + (month << 16) + (day << 8) + quarter_in_the_day + (is_summer_time ? 0x00000080 : 0)
+  return quarter_id; 
+}
+
+// returns a datetime more in the future or in the past based on the given day fraction. 
+// A day fraction of 0.5 would advance 12 hours. 
+// This fraction can be negative as well to go back 12 hours. 
+// The fraction can also include whole days.  
+function addFractionToDatetime(date, fractionOfDay) {
+    const millisecondsInDay = 24 * 60 * 60 * 1000; // Total milliseconds in a day
+    const millisecondsToAdd = fractionOfDay * millisecondsInDay;
+    
+    // Get the current timestamp of the date and add the milliseconds
+    const newTimestamp = date.getTime() + millisecondsToAdd;
+
+    // Create a new Date object with the updated timestamp
+    const newDate = new Date(newTimestamp);
+
+    return newDate;
+}
+
+function adjustQuarterForDayFraction(quarter_id, day_fraction) {
+  var datetime = quarterIdToDateTime(quarter_id)
+  datetime = addFractionToDatetime(datetime, day_fraction);
+  new_quarter_id = dateTimeToQuarterId(datetime)
+  return new_quarter_id
+}
+
+function quarterFormatTime(quarter_date_time) {
+  return quarter_date_time.toLocaleTimeString(dateTimeLang, {hour: '2-digit', minute:'2-digit'})
+}
+
+
+
+function formatQuarterIdDateTimeSpan(quarter_id, include_day = false) {
+  var q_begin_date_time = quarterIdToDateTime(quarter_id);
+  var q_end_date_time = quarterIdToDateTime(quarter_id+1);
+  var result = "";
+  if (include_day) {
+    result = capitalizeFirst(q_begin_date_time.toLocaleDateString(dateTimeLang, data_format_options)) + " ";
+  }
+  return result + quarterFormatTime(q_begin_date_time);
+}
+
+var last_quarter_id = 0; 
+
+function updateLegendLabel() {
+  var chrt = !this.chart ? this : this.chart;
+  chrt.update({
+    legend: {
+      labelFormatter: function() {
+        var lastVal = this.yData[this.yData.length - 1],
+          chart = this.chart,
+          xAxis = this.xAxis,
+          points = this.points,
+          avg = 0,
+          counter = 0
+
+        this.yData.forEach(function(val) { counter++; avg += val; } );
+        if (counter != 0) {
+          avg /= counter;
+        } else {
+          lastVal = 0;
+        }
+           
+
+        color = "#808000"
+        if (avg > 500) {
+          color = "#80FF80"
+        }
+        if (avg> 2000) {
+          color = "#00FF00"
+        }
+        if (avg> 2500) {
+          color = "#FFA500"
+        }
+
+        return this.name + '<br>' + 'Laatst: ' + Math.abs(lastVal) + ' Watt<br>' +
+          '<span style="color: ' + color + '">Gem: ' + Math.abs(avg).toFixed(0) + ' Watt</span><br/>'
+      }
+    }
+  });
+}
+
+ 
+Highcharts.setOptions({
+	global: { 
+		useUTC: false // true by default
+	},
+  chart: {
+        style: {
+            fontFamily: 'Verdana'
+        }
+    }
+});
+
+var chartT = new Highcharts.Chart({
+  global: {  useUTC: false 	},
+  chart:{ 
+    renderTo : 'chart-watts'
+  },
+  title: { text: '' },
+  loading: {
+    labelStyle: { color: 'white' },
+    style: {"position": "absolute", "backgroundColor": "#000000", "opacity": 1.0, "textAlign": "center"}
+  },
+  series: [{
+    name: 'Verbruik',
+    data: [],
+    legend: {
+      enabled: true
+    },
+    zones: [
+      {
+        value: 500,
+        color: '#80FF80' //light green
+      },
+      {
+        value: 2000,
+        color: '#00FF00'  // dark green
+      }, 
+      {
+        value: 2500,      // orange  
+        color: '#FFA500'
+      },
+      {
+        value: 3500,      // red 
+        color: '#FF0000'
+      },
+      {
+        color: '#FF00FF'  // purple
+      }
+    ]
+  }, 
+  {
+    name: 'Productie',
+    data: [],
+    color: '#808000'
+  }
+  ],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { 
+        enabled: false, 
+      }
+    },
+    series: { color: '#059e8a' }
+  },
+  xAxis: {    
+    title: { text: 'Minuten'},
+    type: "datetime",
+    tickInterval: 1000*120, // every two minutes a mark
+    labels: {
+      formatter: function(){
+        var minutes = Highcharts.dateFormat('%M', this.value);          
+        return minutes;
+      },
+    },
+    events: {
+      afterSetExtremes: updateLegendLabel
+    }
+  },
+  yAxis: {
+    title: { text: 'Vermogen (Watt)' }
+  },
+  tooltip: {
+    formatter: function() {
+      return '<b>' + this.series.name + '</b><br/>' +
+              Highcharts.dateFormat('%H:%M:%S', this.x) + ' &nbsp; ' +
+              '<span style="color:' + this.color + '">' +  this.y  + '</span>' + ' Watt';
+    }
+  },
+  credits: { enabled: true },
+  backgroundColor: 'black'
+});
+
+
+
+function retrieveQuarterValuesFromESP(pre_update=false) {
+  var xhttp = new XMLHttpRequest();
+  if (pre_update) {
+    var quarter_id = fetch_quarter
+    if (quarter_id == 0) {
+      quarter_id == last_quarter_id
+    }
+    last_quarter_id = quarter_id
+    document.getElementById('current_quarter_title').innerHTML = formatQuarterIdDateTimeSpan(quarter_id, true);
+    var quarter_date_time = quarterIdToDateTime(quarter_id);
+    chartT.showLoading("Metingen ophalen...");
+    for (serie = 0; serie < chartT.series.length; serie++) {
+      while (chartT.series[serie].data.length > 0) {
+        chartT.series[serie].data[0].remove(false);
+      }        
+    } 
+    chartT.xAxis[0].setExtremes();   
+    chartT.redraw(false);
+  }
+
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+      if (this.status == 404) {
+        chartT.hideLoading();
+        chartT.showLoading("Geen metingen gevonden");
+        chartT.redraw(false);
+      }
+      if (this.status == 200) {
+        var data = JSON.parse(this.responseText);
+        var quarter_id = data.quarter_id
+        // Java script will see this as a local time, which is ok for a current quarter, but not if this would be historic data....
+        var quarter_date_time = quarterIdToDateTime(quarter_id);
+    
+
+        if (last_quarter_id != quarter_id) {
+          last_quarter_id = quarter_id; 
+          // Update heading with time
+          document.getElementById('current_quarter_title').innerHTML = formatQuarterIdDateTimeSpan(quarter_id, true);
+
+          // Update the X-Axis
+          chartT.xAxis[0].setExtremes(quarter_date_time.getTime(), quarter_date_time.getTime() + (15 *60 * 1000), true)
+          retrieveMonthPeakInfoFromESP();
+        }
+
+        // Remove from all series all data - no redraw
+        for (serie = 0; serie < chartT.series.length; serie++) {
+          while (chartT.series[serie].data.length > 0) {
+            chartT.series[serie].data[0].remove(false);
+          }        
+        }      
+        for (i = 0; i < data.consumed_power_interval_avgs.length; i++) {
+          var consumed_power  = data.consumed_power_interval_avgs[i];
+          var produced_power  = data.produced_power_interval_avgs[i];
+          point_time = quarter_date_time.getTime() + (1000 * i * data.interval_secs)
+          if (consumed_power!=null) {          
+            chartT.series[0].addPoint([point_time, consumed_power], false, false, false);
+          }
+          if (produced_power!=null) {          
+            chartT.series[1].addPoint([point_time, produced_power], false, false, false);
+          }
+        }
+        chartT.hideLoading();
+        chartT.redraw(false); // false -> no animation. 
+      }
+    }
+  };
+  
+  url = getQuarterDataFetchUrl();
+    
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+function getBaseUrl() {  
+  root_part_of_url = window.location.origin
+  if (window.location.origin.startsWith("http://localhost")) {
+    root_part_of_url = "http://192.168.0.250"
+  }
+  return root_part_of_url;
+
+}
+
+var fetchable_quarters = []
+
+// Method to ask for which quarters of the current day there is quarter data. 
+// This method is not used anymore, because we now handle 404 and use loading messages on the chart
+function retrieveFetchableQuartersFromESP() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
+      fetchable_quarters = data.quarters;
+      console.log("fetchable quarters:" + fetchable_quarters);
+      document.getElementById("previous_quarter_button").disabled = fetchable_quarters.length == 0
+    }
+  }
+
+  // Start with using the current day to ask the quarters
+  // Later we can perhaps substract how far in the past we are looking. (potentially to other days, months, years)
+  var dateObj = new Date();
+  var month = dateObj.getMonth() + 1; //months from 1-12
+  var day = dateObj.getDate();
+  var year = dateObj.getFullYear();
+
+  var url = getBaseUrl() + `/historic/quarters?year=${year}&month=${month}&day=${day}`;  
+   
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+var month_peak_quarter = 0;
+
+function retrieveMonthPeakInfoFromESP() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
+      var quarter_id = data.peak.quarter_id;
+      month_peak_quarter = quarter_id;
+      document.getElementById('month_quarter_peak_power').innerHTML = data.peak.power.toString()
+      // document.getElementById('month_quarter_peak_moment').innerHTML = formatQuarterIdDateTimeSpan(quarter_id, true);
+    }
+  }
+  var url = getBaseUrl() + "/current/month/peak";  
+   
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+// 0 indicates the current quarter
+var fetch_quarter = 0; 
+
+function getQuarterDataFetchUrl() {
+
+  if (fetch_quarter == 0) {
+    var url =  new URL(getBaseUrl() + "/current/quarter");  
+    return url
+  }
+
+  // calculate the year / month / day / remainder hhmmS or hhmmW from fetch_quarter
+  var year = 2000 + ((fetch_quarter & 0xFF000000) >>> 24);
+  var month = (fetch_quarter & 0x00FF0000) >>> 16;
+  var day = (fetch_quarter & 0x0000FF00) >>> 8;
+  var quarter_in_the_day = fetch_quarter & 0x0000007F; // 7F due to highest bit == Summer time indication....
+  var is_summer_time = fetch_quarter & 0x80 ? true : false;
+  var hour = (quarter_in_the_day >>> 2);  // hour is kept in local time here....
+  var quarter_in_the_hour = quarter_in_the_day % 4;
+
+  console.log("fetch quarter" + fetch_quarter + " year:" + year + "m:" +month +"d:" +day)
+
+  var short_quarter =  String(hour).padStart(2, 0) + String(quarter_in_the_hour*15).padStart(2, 0) + (is_summer_time ? "S" : "W");
+  var year_month_day_path = year + "/" + String(month).padStart(2, '0') + "/" + String(day).padStart(2,0);
+  // form the url out of this. 
+  var url = new URL(getBaseUrl()  + "/meter/" + year_month_day_path + "/" + short_quarter + ".json");
+  return url
+}
+
+var current_interval_timer = 0;
+showCurrentQuarter();
+
+function showCurrentQuarter() {
+  fetch_quarter = 0;
+  if (!current_interval_timer) {
+    current_interval_timer = setInterval( retrieveQuarterValuesFromESP, 5000 ) ;
+  }
+  retrieveQuarterValuesFromESP();
+}
+
+function showAdjustedQuarterByDayFraction(day_fraction) {
+  if (current_interval_timer) {
+    clearInterval(current_interval_timer);
+    current_interval_timer = 0;
+  }
+
+  if (last_quarter_id == 0) {
+    showCurrentQuarter(); 
+    console.log("no current quarter -> reloading")
+    return; 
+  }
+
+  fetch_quarter = adjustQuarterForDayFraction( last_quarter_id, day_fraction)
+
+  // if the quarter to fetch is bigger than the current day, go for a normal showCurrentQuarter way. 
+  if (fetch_quarter >= dateTimeToQuarterId(new Date())) {
+    console.log("datetime is current or in the future")
+    showCurrentQuarter();
+    return;
+  }
+
+  retrieveQuarterValuesFromESP(pre_update=true);
+}
+
+function showPreviousQuarter() {
+  console.log("Hello !")
+  showAdjustedQuarterByDayFraction(-1/96)
+}
+
+function showPreviousDay() {
+  showAdjustedQuarterByDayFraction(-1)
+}
+
+function showPreviousWeek() {
+  showAdjustedQuarterByDayFraction(-7)
+}
+
+function showNextQuarter() {
+  showAdjustedQuarterByDayFraction(1/96)
+}
+
+function showNextDay() {
+  showAdjustedQuarterByDayFraction(1)
+}
+
+function showNextWeek() {
+  showAdjustedQuarterByDayFraction(7)
+}
+
+
+function showMonthPeak() {
+  if (current_interval_timer) {
+    clearInterval(current_interval_timer);
+    current_interval_timer = 0;
+  }
+  fetch_quarter = month_peak_quarter; 
+  retrieveQuarterValuesFromESP(pre_update=true);
+}
+
+</script>
+</html>
