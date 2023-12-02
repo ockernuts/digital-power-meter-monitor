@@ -3,8 +3,8 @@
 # Digitale meter monitor
 De digitale meter monitor is vooral bedoeld voor slimme meters in België. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Belgisch). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
 
-De grootste verschillen met de metingen die je kan zie op de side van een netbeheerder zoals Fluvius zijn: 
-- Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. Elke 5 seconden wordt er een meeting bijgehouden.   
+De grootste verschillen met de metingen die je kan zien op de site van een netbeheerder zoals Fluvius zijn: 
+- Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. Elke 5 seconden wordt er een meting bijgehouden.   
 - De huidige metingen kunnen direct worden getoond. Je moet dus geen dag wachten op je netbeheerder om je verbruik te kunnen raadplegen. 
 - De monitor is een locale "in-huis" toepassing die geen cloud software gebruikt. 
 
@@ -16,15 +16,15 @@ De slimme digitale meter heeft een "P1 poort" langswaar de metingen kunnen ontva
 
 ![](doc/ports_digital_meter.png)
 
-De P1 poort werkt niet zonder deze open te zetten via de website van je network operator (zoals Fluvius). Het kan enige dagen duren voor een "open zetten" effectief in werking komt. 
+De P1 poort werkt niet zonder deze open te zetten via de website van je network operator (zoals Fluvius). Het kan enige dagen duren voor het "open zetten" effectief in werking komt. 
 
 Het monitoren wordt gedaan door een ESP32 bordje waarvoor je de software hier vindt. 
-In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connectie zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
+In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connecties zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
 > **OPGEPAST**: Verbind nooit het bordje met de digitale meter en met een USB kabel. 
 
 Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
 
-De gebruikte borden hebben Wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP - u dient met Wifi op het thuis netwerk geconnecteerd te zijn). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
+De gebruikte borden hebben Wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP + u dient met op het thuis netwerk geconnecteerd te zijn, via een kabel of aanwezige Wifi's). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
 
 De metingen worden getoont per vaste kwartieren in het uur. Dit omdat het gemiddeld verbruik per kwartier gepenaliseerd kan worden door extra verbruikskosten voor gemiddelden hoger dan 2500 Watt. Er is een extra kost van ongeveer 4 euro (referentie 2023) per extra 1000 Watts boven 2500 Watt voor het hoogste gemiddelde kwartier verbruik in een maand. Dit is het zogenoemde capaciteits tarief. 
 
@@ -69,7 +69,7 @@ Eens verbonden kan je dus surfen naar http://192.168.4.1 alwaar je de Wifi confi
 De configuratie bestaat uit :
 - Wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
 Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor. 
-> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk geeft of kan geven. Voor Telenet kan je op "Mijn Telenet" de Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
+> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk verzorgt of kan verzorgen. Voor Telenet kan je op "Mijn Telenet" de Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
 
 > Gebruik ook een Wifi netwerk dat altijd aanblijft staan ! 
 
