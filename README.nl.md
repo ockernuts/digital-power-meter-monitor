@@ -1,9 +1,11 @@
-# Digital meter monitor
-De digitale meter monitor is bedoeld voor slimme meters in België. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief. Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijks sluimer verbruikers te helpen opsporen. 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 
-De grootste verschillen met de metingen die je kan zie op Fluvius zijn: 
-- Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. 
-- De metingen worden direct getoond. Je moet dus geen dag wachten om je verbruik te kunnen raadplegen. 
+# Digitale meter monitor
+De digitale meter monitor is vooral bedoeld voor slimme meters in België. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Belgisch). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
+
+De grootste verschillen met de metingen die je kan zie op de side van een netbeheerder zoals Fluvius zijn: 
+- Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. Elke 5 seconden wordt er een meeting bijgehouden.   
+- De huidige metingen kunnen direct worden getoond. Je moet dus geen dag wachten op je netbeheerder om je verbruik te kunnen raadplegen. 
 - De monitor is een locale "in-huis" toepassing die geen cloud software gebruikt. 
 
 
@@ -20,13 +22,13 @@ Het monitoren wordt gedaan door een ESP32 bordje waarvoor je de software hier vi
 In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connectie zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
 > **OPGEPAST**: Verbind nooit het bordje met de digitale meter en met een USB kabel. 
 
-Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere optie open. Gebruik een 8GB micro SD card tot en met een 64GB card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
+Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
 
-De gebruikte borden hebben Wifi connectiviteit en bieden een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP - u dient met Wifi op het thuis netwerk geconnecteerd te zijn). Op de web interface kan je de huidige metingen bijna in real-tome zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
+De gebruikte borden hebben Wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP - u dient met Wifi op het thuis netwerk geconnecteerd te zijn). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
 
 De metingen worden getoont per vaste kwartieren in het uur. Dit omdat het gemiddeld verbruik per kwartier gepenaliseerd kan worden door extra verbruikskosten voor gemiddelden hoger dan 2500 Watt. Er is een extra kost van ongeveer 4 euro (referentie 2023) per extra 1000 Watts boven 2500 Watt voor het hoogste gemiddelde kwartier verbruik in een maand. Dit is het zogenoemde capaciteits tarief. 
 
-Men kan gemakkelijk navigeren naar de details van dit hoogste kwartier in de huidige maand indien de monitor toen ook gemeten heeft door op de "Maand piek" knop te duwen. 
+Men kan gemakkelijk navigeren naar de details van dit hoogste kwartier in de huidige maand indien de monitor toen ook gemeten heeft, door op de "Maand piek" knop te duwen. 
 
 ![](doc/app/month_peak_viewing.png)
 
@@ -60,24 +62,24 @@ Je zou nu een LED moeten zien branden. Is dit niet het geval check dan of je P1 
 > **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en aan een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en Wifi configuratie is dan ook mogelijk. 
 
 Bij een eerste opstart zal het bordje Wifi connectie parameters proberen ophalen van het config.json bestand op de micro SD card. 
-Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. Het bordje krijgt dan een IPAddress in dit netwerk van 192.168.4.1 en dit in een netwerk 192.168.4.0/24. 
+Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. Het bordje krijgt dan een IP adres in dit netwerk van 192.168.4.1 en dit in een netwerk 192.168.4.0/24. 
 Eens verbonden kan je dus surfen naar http://192.168.4.1 alwaar je de Wifi configuratie kan doen voor toekomstige opstarts. 
 > Soms is het moeilijk om op het "DigitaleMeterMonitor" netwerk te geraken en te blijven omdat er geen internet verbinding is in deze configuratie mode. 
 
 De configuratie bestaat uit :
 - Wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
 Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor. 
-> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk geeft of kan geven. Voor Telenet kan je om "Mijn Telenet" we Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
+> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk geeft of kan geven. Voor Telenet kan je op "Mijn Telenet" de Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
 
 > Gebruik ook een Wifi netwerk dat altijd aanblijft staan ! 
 
 - Wifi netwerk passwoord
-- IPAddress: Het bord/de monitor heeft een vast IP adres nodig voor in-huis gebruik. Automatisch adres toekenning (DHCP) is bewust niet ondersteund. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
+- IP adres: Het bord/de monitor heeft een vast IP adres nodig voor in-huis gebruik. Automatisch adres toekenning (DHCP) is bewust niet ondersteund. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
 > Als je een Telenet internet provider hebt kan je in "Mijn Telenet" kijken welke toestellen al IP adressen hebben. Alsook zal de Telenet modem typisich automatisch adressen uit delen aan toestellen resulterend in mogelijks gebruikte IP adressen eindigend op .2 tot .249 (en niet hoger). Dit is waarom onze default op .250 eindigt.  
 - Subnet: Dit is typisch 192.168.0.0/24. Het kan echter van je thuis setup afhangen of van je internet provider setup.
 - Gateway IP: Dit is typisch 192.168.0.1 of het .1 adress in je subnet. 
 
-Eens deze configuratie doorgegeven is wordt ze opgeslagan in het config.json bestand op de micro SD card.  
+Eens deze configuratie doorgegeven is wordt ze opgeslagen in het config.json bestand op de micro SD card.  
 
 Het bordje zal vervolgens herstarten en met de geconfigureerde Wifi proberen connecteren. 
 
@@ -85,17 +87,18 @@ Bij opstart zal een een LED fel beginnen branden om vervolgens verschillende opl
 Uiteindelijk zal de LED slechts een beetje oplichten. Dit is goed nieuws. Het bordje kon zich verbinden met de Wifi en is klaar om metingen te ontvangen van de digitale meter.
 Lukt dit niet kijk dan hieronder naar "Alternatieve Wifi configuratie".
 
-Als het bord geconnecteerd is met de P1 poor op je digitale meter (zonder ook de USB kabel aan te houden) zou de gedimde LED enekele keren per seconde moeten knipperen. Dit geeft aan dat er metingen binnen komen.
+Als het bord geconnecteerd is met de P1 poort op je digitale meter (zonder ook de USB kabel aan te houden) zou de gedimde LED enkele keren per seconde moeten knipperen. Dit geeft aan dat er metingen binnen komen.
 
 ## Metingen bekijken 
-Als het bordje werkt zou jet het moeten kunnen contacteren met je GSM, laptop of PC via een browser (bijvoorbeeld chrome) via HTTP. 
-Standaar is dat op http://192.168.0.250 of vervang hierin het IP adres dat je configureerde. 
-Je zou dan metingen moeten kunnen zien.  
+Als het bordje werkt zou je het moeten kunnen contacteren met je GSM, laptop of PC via een browser (bijvoorbeeld chrome) via HTTP. 
+Standaard is dat op http://192.168.0.250 of vervang hierin het IP adres dat je configureerde. 
+Je zou dan metingen moeten kunnen zien.
+Je moet ook wel geconnecteerd zijn op het zelfde thuis-netwerk. (Dat kan typische via kabel of een Wifi netwerk van je huis)  
 
 ## Alternatieve Wifi configuratie
 Een alternatieve manier om de Wifi configuratie te doen is om het bordje te ontkoppelen zodat het niet werkt, er de micro SD card uit te halen, deze in een laptop/PC te steken (typisch met een adaptor; alsook niet elke laptop/PC heeft een SD card slot...). Je kan dan het config.json bestand wijzigen (of wegdoen). 
 
-Het config.json bestand hier het volgende formaat: 
+Het config.json bestand heeft het volgende formaat: 
 ````
 {
   "wifi": {
@@ -143,7 +146,7 @@ De seriele monitoring ziet er bij een eerst opstart ongeveer alsvolgt uit:
   ````
 De pin waarden zullen verschillen per bord type. 
 
-In dit voorbeeld start het bordje op in "configuratie mode" en maakt het "DigitaleMeterMonitor" netwerk hiervoor.  
+In dit voorbeeld start het bordje op in "configuratie mode" en maakt het bordje het "DigitaleMeterMonitor" netwerk hiervoor.  
 
 Wanneer de Wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
   ````
@@ -194,7 +197,7 @@ De "data" folder bevat bestanden voor de web applicatie op het bordje.
 
 Deze bestanden worden op een flash file systeem gezet van het ESP bordje. Dit filesysteem is ook gekend als "little FS".
 
-Je hoofd interesse zal het index.html bestand zijn als ontwikkelaar. 
+Je hoofdinteresse zal het index.html bestand zijn als ontwikkelaar. 
 De code hierin krijgt huidige, historisch en maand piek data via de volgede HTTP GETs:  
 - GET http://&lt;ip&gt;/current/quarter
   Dit komt uit het RAM geheugen. 
@@ -205,14 +208,14 @@ De code hierin krijgt huidige, historisch en maand piek data via de volgede HTTP
 
 De index.html pagina detecteerd wanneer ze gehost wordt vanaf een localhost server. In dit geval doet het GETs naar 192.168.0.250, alwaar mogelijks een functioneel bord aanwzig is al dan niet ingeplugd op de digitale meter. 
 Dit faciliteerd debuggen omdat je zo gemakkelijk het index.html bestand kan wijzigen (zonder een file systeem build te maken) en de wijziging uit te proberen. 
-Het wil zeggen dan je een http server moet draaien op je laptop/PC.  
+Het wil wel zeggen dan je een http server moet draaien op je laptop/PC.  
 Om dit te doen is er een Python httpserver.py bestand in de data folder die kan worden gelopen. 
 Om te starten op locale poort 8000:
 ````
   cd data
   python httpserver.py
 ````
-Je hebt natuurlijk een Python installatie nodig ! Dit is getest met Python 3.11.1 op een Windows PC. 
+Je hebt hier natuurlijk een Python installatie voor nodig ! Dit is getest met Python 3.11.1 op een Windows PC. 
 
 Hierna kan je surfen naar: 
 http://localhost:8000

@@ -1,3 +1,5 @@
+[![nl](https://img.shields.io/badge/lang-nl-yellow.svg)](README.nl.md)
+
 # Digital power meter monitor
 The digital power meter monitor is for power meters installed in Belgium. It can measure and show the current or past power measurements in real-time on your phone or PC/laptop.
 Screenshots are in Dutch: 
