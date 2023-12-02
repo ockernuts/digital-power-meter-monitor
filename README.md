@@ -1,110 +1,113 @@
-# What is this
-This project is about monitoring a digital power meter installed in homes in Belgium, following the DSRM standard. 
+# Digital power meter monitor
+The digital power meter monitor is for power meters installed in Belgium. It can measure and show the current or past power measurements in realtime on your phone or pc/laptop.
+Screenshots are in Dutch: 
+
+![](doc/app/current_measurement_viewing.png)
+
+The digital power meter a "P1 port" through wich the measurements can be received. 
+> Using the "S1 port" will likely destroy the monitor. 
+
+![](doc/ports_digital_meter.png)
+The P1 port is disabled by default and can be opened through an action on the website of your network operator (like Fluvius) typically. Though, it can take days for it to get activated. 
+
 The monitorring is done using an ESP32 board for which the software is here. 
-We also describe then needed hardware connection to an RJ12 cable that one can plug into the power meter. 
+In sections below the needed hardware connections to an RJ12 cable that one can plug into the power meter P1 port are described per supported ESP32 board. You need an RJ12 cable with 6 wires, called: 6P6C, not 6P4C
+
+Detailed measurements per quarter are stored on an SDCard in json format. Hence we focus on boards that have the SDCard reader integrated, leaving other options open. Use an 8GB micro SD card or up to 64GB (only tested up to 16GB). It is best to reformat the SD Card first and to choose a small cluster size, because the stored files are all small. 
+
+The board is connected to Wifi and exposes a web interface, meant for in home access only (http), on which one can see the current measurements almost in realtime (updated every 5 seconds by default) or navigate to historical measurements.
+
+The measurements are show per fixed quarters in the hour because the average watt consumption per quarter can be penalized by higher electricity costs when they exceed 2500 Watts. One incurs an additional cost of approximately 4 euros (as of the 2023 reference) per each exceeded 1000 Watt on the highest quarter-average consumption per month. This pertains to the capacity tariff, known as 'capaciteits tarief' in Dutch."
+
+One can easily jump back to the details of the quarter causing the month peak by pressing the "month peak" button if the monitor measured that quarter. 
+
+![](doc/app/month_peak_viewing.png)
+
+
 The source code can deal with multiple boards in theory. 
-In practice the LilyGo TTGO T8 ESP32-C3 board is mostly used and thus certainly working. 
+In practice the LilyGo TTGO T8 ESP32-C3 board is mostly used and thus certainly working. It is also the most power efficient.
 
 
 # Using the source code
-Make sure you have Visual Studio code with "Platform IO" installed. 
-Platform IO has an Icon on the left side of Visual Studio code to activate it. 
+Make sure you have Visual Studio Code with "Platform IO" installed as IDE/Tooling environment. 
+Platform IO has an alien alike icon on the left side of Visual Studio Code to activate it. 
 Clicking on it, you should be able to see the "PIO Home" tab. 
 
 Clicking on the project should show a tab per target hardware device. 
 
 For example: "TTGO_T8_ESP32_C3"  
 
-See below for hardware specific setup. 
+See specific board sections below for their hardware specific setup.
 
+To get a working board, you need to build and upload the filesystem image and the C/C++ code. (Do this with Platform IO Project Tasks). Their might be board specific actions needed to get it in a state where the items can be uploaded over the USB cable. 
 
-
-# TTGO T8 ESP32-C3
-- One needed to install special Serial USB drivers and reboot the pc or laptop first before the connection was even recognised as a serial port...
-  Somethimes the serial port only comes up after using some other board and then switch back...
-- To get the first Serial to work for debugging, we needed to set additional build flags so the hardware serial is used. 
-  build_flags = 
-    -D TTGO_T8_ESP32_C3
-	-DARDUINO_USB_MODE=1
-    -DARDUINO_USB_CDC_ON_BOOT=1
-- To get the first upload working containing the above, one must manually enter program mode by:
-  - pressing the boot button (do not release)
-  - press the reset button and release
-  - release the boot button
-
-  Then upload...
-  
-- After investigation on the web and measurring, it seams the HardwareSerial.begin pulls up the RX pin as needed. 
-  Measured 3.3V on RX1 -> PIN 2
-  This would mean we don't need to foresee an external pull-up resistor - yeah ! 
-  Also discoverred later that there is even a resistor externally to the ESP chip to pull this up.  
-
-- Found out the hard way that pin 9 can not be used for RTS, as the connection to the DSRM pulls it down. 
-  Appearantly this influences the ESP32 startup and is goes in program mode...
-
-A black RJ12 cable from "Inline Computer Accessories" ( bought on Amazon), has a strange color layout. The ALT COLOR below is the more normal color. 
-
-- The pinout of DSRM and colors for the black cable are as follows (from LEFT to right when viewing with plug up with the lip on top): 
-   PIN               COLORS  ALT COL
-   P1   5V           white   white    - left most wire in RJ11 connector with clip on top at digital meter / most right wire at board 
-   P2   RTS Input    brown   black    - Active high INPUT to let the meter send data (Active hight due to optocoupler)
-   P3   GND for DATA green   red
-   P4   No function  yellow  green
-   P5   TX           grey    yellow   - open collector output. 
-   P6   GND for POW  orange  blue
-
-- The connections of the RJ12 pins to the board are as follows
-               COLOR  ALT COLOR
-  - P1 -  5V - white  white  -    5V -  5V on the board (near the sdcard connector). 
-  - P2 - RTS - brown  black  -  IO08 - RTS on the other side of the board 3rd hole from the bottom. 
-  - P3 - GND - green  red      (NC)
-  - P4 -     - yellow green    (NC)
-  - P5 - TX  - grey   yellow  -  IO02 - RX1 on the board , 4 holes above the 5V pin. Pulled up without soldering.
-  - P6 - GND - orange blue    -  GND  - GND on the board, 3 holes above the 5V pin. 
-
-# TTGO T8 ESP32-S2
-See: https://github.com/Xinyuan-LilyGO/ESP32_S2
-
-This is a "LILYGO ESP32-S2" module (V1.1)
-This is a board that holds a socket to put in a micro SD card. 
-The SD Card is used to put the per quarter measurred date on it. 
-The board also has a USB module. 
-There are 2 DIP switch blocks on the board that we normally do not touch. 
-The first DIP sqwitch block is close to the USB connector. 
-When the Connector is to the left of the board, the switch positions are: UP, DOWN, UP, DOWN
-This corresponds to "USB" mode (slave mode -> your PC is the master)
-In another position one gets OTG mode (master mode, the board is an USB master and it can suppor other devices) 
-We never use the OTG mode. 
-
-To initialize a board, we need to put on it two things:
-- The CODE
-- The "data" partition/little fs file system. 
-
-First make sure the code can be build withouth troubles. 
 Make sure there is an SD card in the board. 
 
-Then plugin the USB cable in the board and connect to the PC. 
-On the bottom of the VSCode window you can see a serial connector with either "Auto" or "COM<n>" next to it. 
-Select here the port you think corresponds to the plugged in board. 
 
-In the Project tasks select "Upload and Monitor". 
-This will upload the code and then listen to serial output send to the pc by the embedded board program. 
-This should normally lead to an output where you see the board starting to emit messages. 
-If the "data" partition is not uploaded yet, the software will likely fail with the "Failed to Init LittleFS" or something like that. 
+# Using the board with the installed code
+## First startup or statup with Wifi connection problems
+Upon first startup the board will try to locate Wifi connection parameters from the config.json file on the SDCard. 
+If this file doesn't exist or the board cannot connect to the Wifi network, it will startup in configuration mode and act as an access point for a Wifi network "DigitaleMeterMonitor". This uses an IP Subnet 192.168.4.0/24 on which the board has the IP 192.168.4.1.
+As such one can connect to that Wifi network and browse to http://192.168.4.1 to configure the Wifi settings.
+Sometimes it is difficult to stay on the board's network since it has no path to the internet.  
 
-To upload the data partition/ little FS, leave the USB connected and use the "Build FIlesystem Image" option. 
-The use the "Upload Filesystem Image" options. This is only needed once, unless files changes, but there is a better method...upload over wifi. (see below).  
+In the configuration the board will require a :
+- Wifi network / SSID to connect to
+- Wifi network password
+- IPAddress: The board needs a fixed IPAddress for in home use (No DHCP). Choose a free address, typically ending in a high value. Our default is 192.168.0.250.  
+- Subnet: This is typically 192.168.0.0/24 . This depends on your in house setup / Telecom provider. 
 
-Hereafter do an Upload and Monitor again and see that the system starts up better. 
-Normally (on a blank board), this will emit messages like: 
+Once this config is submitted it will be saved to the SDCard in the config.json file. 
 
+The board will then reset and attempt to connect to the Wifi. 
+
+Upon startup the onboard LED will light up bright in several sequences. 
+Eventually the onboard LED should dim. This means it started up ok and is awaiting data from the digital power meter. 
+If the board is connected to the digital power meter using the RJ12 cable (see pinout and connection schemas for each board in sections below), the dimmed LED should even pulsate a couple of times per second. This indicates the measurements are comming in. 
+
+## Viewing the measurements
+If the board is running you should be able to contact it on it's ip address over http. By default this is http://192.168.0.250
+You should then see the measurements. 
+
+## Alternative Wifi config
+An alternative way to configure the board to proper Wifi is to power it off, unmount the sdcard from it and put it in a laptop/pc from where you can edit the config.json. 
+
+The config.json looks like:
+````
+{
+  "wifi": {
+    "ssid": "yourSSID",
+    "password": "yourPassword"
+  },
+  "network": {
+    "ip" : "192.168.0.250",
+    "gateway": "192.168.0.1",
+    "subnet": "255.255.255.0"
+  }
+}
+````
+
+Change what you want, save, properly unmount the card from the laptop/pc and remount it on the board. 
+Connect the board. 
+
+## Debug the startup with the serial monitor
+Upon trouble with startup, one can also use the Platform IO serial monitor to see what the board is doing upon startup. 
+If monitorred serially it emits messages like:
+
+  ````
+  Digital meter monitor using board: LilyGo TTGO T8 ESP32 C3 V1.1
+  LED pin: 3
   Ports used for SD Card communication:
-  MOSI: 35
-  MISO: 37
-  SCK: 36
-  SS: 34
+  MOSI: 7
+  MISO: 5
+  SCK: 4
+  SS: 6
+  SD Card sectorsPerCluster  64      
+  SD Card OK
+  Creating test dir /meter/2022/01/01
+  Creating test file /meter/2022/01/01/hello.txt
   Serial pins used for communication to digital meter:
-  RX1: 38, TX1: 40, RTS: 36
+  RX1: 2, TX1: 0, RTS 8
   LittleFS Init OK
   No prior WIFI config
       Setup Mode
@@ -113,63 +116,147 @@ Normally (on a blank board), this will emit messages like:
   DigitaleMeterMonitor
   Connect IP:
   192.168.4.1
+  ````
 
-The device starts up as an access point with an SSID "DigitaleMeterMonitor". 
--> Let your PC Connect to this Wifi. 
-In the serial monitor you will see a lot of messages like: 
-[2124569][E][vfs_api.cpp:105] open(): /littlefs/204 does not exist, no permits for creation   
-[2124571][E][vfs_api.cpp:105] open(): /littlefs/204.gz does not exist, no permits for creation
-[2124576][E][vfs_api.cpp:105] open(): /littlefs/204/index.htm does not exist, no permits for creation   
-[2124585][E][vfs_api.cpp:105] open(): /littlefs/204/index.htm.gz does not exist, no permits for creation
-[2124850][E][vfs_api.cpp:105] open(): /littlefs/connecttest.txt does not exist, no permits for creation   
-[2124852][E][vfs_api.cpp:105] open(): /littlefs/connecttest.txt.gz does not exist, no permits for creation
-[2124860][E][vfs_api.cpp:105] open(): /littlefs/connecttest.txt/index.htm does not exist, no permits for creation
-[2124869][E][vfs_api.cpp:105] open(): /littlefs/connecttest.txt/index.htm.gz does not exist, no permits for creation
-...
+The pin values will vary per board type. 
 
-Not a problem. 
-
-On the PC open a browser an go to http://192.168.4.1
-This should give you a page where you can setup the board to connect to your home Wifi. 
-Make sure that you use a not used ipaddress. 
-
-If you miss here, the device will after applying the settings restart and attempt to connect to the wifi, fail and 
-become an access point again so that you can repeat the above steps.
+In this example, the dhe device starts up as an access point with an SSID "DigitaleMeterMonitor". 
 
 When the Wifi is connecting fine you will see on the debug terminal:
+  ````
+  Digital meter monitor using board: LilyGo TTGO T8 ESP32 C3 V1.1
+  LED pin: 3
+  Ports used for SD Card communication:
+  MOSI: 7
+  MISO: 5
+  SCK: 4
+  SS: 6
+  Init SD SLOT SPI...
+  SD SLOT SPI Pins set
+  SD Card sectorsPerCluster  64      
+  SD Card OK
+  Creating test dir /meter/2022/01/01
+  Creating test file /meter/2022/01/01/hello.txt
+  Serial pins used for communication to digital meter:
+  RX1: 2, TX1: 0, RTS 8
+  LittleFS Init OK
+  Opened /config.json file, size 138
+  Previous SSID:
+  ghost
+
   Connecting ...
-  WL_DISCONNECTED
   WL_CONNECTED
   Connected !
   192.168.0.248
   Syncronizeer Tijd
   --------------------------------
-  ........................Synced in 2400 ms.
-  Init SD card - SPI...
-  SD Card SPI Pins set
-  SD Card OK
+  ..............................Synced in 3000 ms.
+  2023-12-02 13:37:27
   Verbruiksmonitor
   --------------------------------
-  
-Here 192.168.0.248 is the wifi. Connect to it with your browser. 
+````
 
-You should see a black page with title "Digitale Meter Monitor" and some ? marks on meassured values. 
-This is the case if the device is not connected to the digital meter....
-
-Unplug the board from the pc and plug its RJ45 connector into the digital meter of your home. 
-
------------------------------
-
-Upgrading a board.
-On can connect to the board with a browser:
+After the board has software and can connect to Wifi, it can be upgraded by browsing to:
+````
 http://<ipaddress>/update
+````
 
-This gives you a user interface where build output files can be uploaded for code or data, as needed. 
+This gives you a user interface where build output files can be uploaded for code or data(file system), as needed. 
 
------------------------------
+# Develop on the web application served
+The data folder contains the files for the web application. 
+Your main intrest will be the index.html file. 
+This gets current and historic data using HTTP GET calls like: 
+- GET http://&lt;ip&gt;/current/quarter 
+- GET http://&lt;ip&gt;>/meter/2023/12/01/1615W.json
+- GET http://&lt;ip&gt;>/current/month/peak
+
+The index.html page detects when it is served from localhost. In this case it does the above GET calls to 192.168.0.250 hard coded, to facilitate in debugging. 
+
+There is a python httpserver.py file in the data folder which can be run to start service index.html on the local port 8000:
+````
+  cd data
+  python httpserver.py
+````
+Obviously you need a version of python installed. Tested with python 3.11.1 on a windows pc. 
+
+After this you can browse to: 
+http://localhost:8000
+and you can start debugging / changing the html and javascript code as you wish. 
+
+You can do development on your computer with 
+
+# Board specifices
+## TTGO T8 ESP32-C3
+See: [LilyGo ESP32-C3 board with SDCard interface](https://www.lilygo.cc/products/t8-c3)   
+See: [NL Supplier link](https://www.tinytronics.nl/shop/en/development-boards/microcontroller-boards/with-wi-fi/lilygo-ttgo-t8-c3-esp32-c3-4mb-flash)
+
+This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SDCard interface. 
+
+- One needed to install special Serial USB drivers and reboot the pc or laptop first before the connection was even recognised as a serial port...
+  See: [Espressif page](https://docs.espressif.com/projects/esp-idf/en/v5.0.2/esp32c3/get-started/establish-serial-connection.html)   
+  Somethimes the serial port only comes up after using some other board and then switch back...
+- To get the first Serial to work for debugging, we needed to set additional build flags so the first hardware serial goes out to the USB connector.
+  ```` 
+  build_flags = 
+    -D TTGO_T8_ESP32_C3
+    -DARDUINO_USB_MODE=1
+    -DARDUINO_USB_CDC_ON_BOOT=1
+  ````  
+- To get the first upload working containing the above, one must manually enter program mode by:
+  - pressing the boot button (do not release)
+  - press the reset button and release
+  - release the boot button
+
+  Then upload...
+  
+- After investigation on the web and measurring, it seems the HardwareSerial.begin pulls up the RX pin as needed. 
+  Measured 3.3V on RX1 -> PIN 2
+  This would mean we don't need to foresee an external pull-up resistor - yeah ! 
+  Also discoverred later that there is even a resistor externally to the ESP chip to pull this up.  
+
+- Found out the hard way that pin 9 can not be used for RTS, as the connection to the DSRM pulls it down. 
+  Appearantly this influences the ESP32 startup and is goes in program mode...
+
+- The pinout of DSRM and colors for typical cables and connectio to the ESP board are as follows: 
+
+   |RJ12 PIN         | COLORS | ALT COL | ESP32 PIN | Comment |
+   |----------------:|:------:|:-------:|:--------|---------|
+   |P1   5V          | white  | white   | 5V (near SD Card) | Left most wire in RJ11 connector with clip on top at digital meter / most right wire at board | 
+   |P2  RTS Input    | black  | brown   | IO08 - RTS out | Active high INPUT to let the meter send data (Active high due to optocoupler) |
+   |P3  GND for DATA | red    | green   | | Not used |   
+   |P4  No function  | green  | yellow  | | Not used
+   |P5   TX          | yellow | grey    | IO02 RX1 | Inverted due to opto coupler in meter| 
+   |P6   GND for POW | blue   | orange  | GND | |
+
+- Wiring overview: ![](doc/TTGO_T8_ESP32_C3/pinout%20V1.1.jpg)
+- Soldered and assembled example:  ![](doc/TTGO_T8_ESP32_C3/T8-C3-soldered-assembled.jpg)
+
+
+## TTGO T8 ESP32-S2
+> **Warning**
+> There is still a problem with this board to access the SDCard properly
+
+See: [Tinytronics supplier in NL for the ESP32-S2 board with SDCard interface](https://www.tinytronics.nl/shop/nl/development-boards/microcontroller-boards/met-wi-fi/lilygo-ttgo-t8-esp32-s2-met-sd-kaart-slot)   
+See: [Github use examples](https://github.com/Xinyuan-LilyGO/ESP32_S2)
+
+
+This is a "LILYGO ESP32-S2" module (V1.1)
+This is a board that holds an interface to put in a micro SD card. 
+
+- There are 2 DIP switch blocks on the board that we normally do not touch. 
+  The first DIP sqwitch block is close to the USB connector. 
+  When the Connector is to the left of the board, the switch positions are: UP, DOWN, UP, DOWN
+  This corresponds to "USB" mode (slave mode -> your PC is the master)
+  In another position one gets OTG mode (master mode, the board is an USB master and it can suppor other devices) 
+  We never use the OTG mode. 
+ 
+After programming the board with the filesystem and code, it should startup normally. 
+
+
 
 New board hardware wiring needed...
-- The digital meter P1 port can fit an RJ12 connector with 6 wires (6P6C needed not 6P4C). 
+
   If you buy a cable and cut it in half to solder on end to the board, you have one end with "normal" colors and one end with "reversed" colors. 
 - The pinout and colors are as follows (from LEFT to right when viewing with plug up with the lip on top): 
    PIN               COLORS  ALT COL

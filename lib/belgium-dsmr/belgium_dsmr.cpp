@@ -75,6 +75,12 @@ bool ProcessP1ReaderResults(struct P1Data& returned_data) {
     p1_reader.enable(true);
     return false; 
   }  
+  // Special, the month average is only reported after the quarter, so to get the proper quarter_id later
+  // we must substract 15 minutes from the reading...
+  returned_data.monthly_peak_timestamp.tm_min -=15;
+  // the mktime fuction normalizes the time, so also adjusts to the previous hour, day, year if needed. 
+  mktime(&returned_data.monthly_peak_timestamp);
+
 
   if (!dsmr_parse_datetime( data.timestamp.c_str() , &returned_data.message_timestamp)) {
     p1_reader.enable(true);

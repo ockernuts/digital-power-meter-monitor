@@ -28,9 +28,6 @@ void __wrap_panic_print_char(const char c) {
 
 WiFiClientSecure client;
 
-// const char* token = "5944256964:AAEV6Xc84jeBgkOY4ZUJDrL8IpGcL_BuGqA";  // dsmrwimbot
-// int64_t userid = 6052266704;
-
 AsyncWebServer server(80);
 
 #if PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_TFT 
