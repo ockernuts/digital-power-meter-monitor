@@ -8,6 +8,7 @@ The digital power meter has a "P1 port" through which the measurements can be re
 > Using the "S1 port" will likely destroy the monitor. 
 
 ![](doc/ports_digital_meter.png)
+
 The P1 port is disabled by default and can be opened through an action on the website of your network operator (like Fluvius) typically. However, it can take days for it to get activated. 
 
 The monitoring is done using an ESP32 board for which the software is here. 
@@ -214,14 +215,14 @@ This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SDCard interfa
 
 - The pinout of DSRM and colors for typical cables and connection to the ESP board are as follows: 
 
-   |RJ12 PIN | P1 function | COLORS | ALT COL | ESP32 PIN | ESP Function | Comment |
-   |---------|-------------|:------:|:-------:|--------|-----|---------|
-   |P1 |  5V          | white  | white   | 5V | 5V | 5V is near the SD Card interface on the board.<br> P1 is the leftmost wire in the RJ12 connector when the clip is on top | 
-   |P2 | RTS Input    | black  | brown   | IO08 | RTS out | Active high input to let the meter send data (Active high due to optocoupler) |
-   |P3 | GND for DATA | red    | green   | | | Not used |   
-   |P4 | No function  | green  | yellow  | | | Not used
-   |P5 |  TX          | yellow | grey    | IO02 | RX1 | Inverted due to opto coupler in meter. <br> Inverted in ESP/Software by HardwareSerial initialization | 
-   |P6 |  GND for POWER | blue   | orange  | GND | GND |
+   |RJ12 PIN | P1 function | Wire color| ESP32 PIN | ESP Function | Comment |
+   |---------|-------------|:---------:|--------|-----|---------|
+   |P1 |  5V          | white  | 5V | 5V | 5V is near the SD Card interface on the board.<br> P1 is the leftmost wire in the RJ12 connector when the clip is on top | 
+   |P2 | RTS Input    | black  | IO08 | RTS out | Active high input to let the meter send data (Active high due to optocoupler) |
+   |P3 | GND for DATA | red    | | | Not used |   
+   |P4 | No function  | green  | | | Not used
+   |P5 |  TX          | yellow | IO02 | RX1 | Inverted due to opto coupler in meter. <br> Inverted in ESP/Software by HardwareSerial initialization | 
+   |P6 |  GND for POWER | blue | GND | GND |
 
 - Wiring overview: ![](doc/TTGO_T8_ESP32_C3/pinout%20V1.1.jpg)
 - Soldered and assembled example:  ![](doc/TTGO_T8_ESP32_C3/T8-C3-soldered-assembled.jpg)
@@ -249,13 +250,13 @@ This is a board that holds an interface to put in a micro SD card.
 After programming the board with the filesystem and code, it should start normally. 
 
 - The pinout and colors are as follows: 
-   |RJ12 PIN | P1 Function | COLORS | ALT COL | ESP32 PIN | ESP Function | Comment |
-   |---------|-------------|:------:|:-------:|:----------|--------------|---------|
-   | P1 | 5V         |  white |         | 5V        | 5V | Left most wire in RJ12 connector with clip on top at digital meter |
-   | P2 | RTS Input  |  black |         | PIN 19   | RTS Out | Active high input to let the meter send data (Active high due to optocoupler) |
-   | P3 | GND for DATA| red  |         |           | | Not used |
-   | P4 | No function |green |         |           | | Not used |
-   | P5 | TX         | yellow|         | PIN 18    | RX1 | Open collector output, hence inverted.<br> Inverted at reception by ESP Hardware serial initialization.<br> Pulled up on ESP board. | 
-   | P6 | GND for POWER|blue |         | GND       | GND ||
+   |RJ12 PIN | P1 Function | Wire color | ESP32 PIN | ESP Function | Comment |
+   |---------|-------------|:----------:|:----------|--------------|---------|
+   | P1 | 5V         |  white  | 5V        | 5V | Left most wire in RJ12 connector with clip on top at digital meter |
+   | P2 | RTS Input  |  black  | IO19      | RTS Out | Active high input to let the meter send data (Active high due to optocoupler) |
+   | P3 | GND for DATA| red    |           | | Not used |
+   | P4 | No function |green   |           | | Not used |
+   | P5 | TX         | yellow  | IO18      | RX1 | Open collector output, hence inverted.<br> Inverted at reception by ESP Hardware serial initialization.<br> Pulled up on ESP board. | 
+   | P6 | GND for POWER|blue   | GND       | GND ||
 
 - Wiring overview: ![](doc/TTGO_T8_ESP32_S2/pinout%20V1.1.jpg)
