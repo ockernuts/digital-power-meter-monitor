@@ -52,7 +52,9 @@ Sometimes it is difficult to stay on the board's network since it has no path to
 - Wifi network / SSID to connect to
 - Wifi network password
 - IPAddress: The board needs a fixed IPAddress for in-home use (No DHCP). Choose a free address in your home network, typically ending in a high value. Our default is 192.168.0.250. If you have Telenet as an ISP Provided you can have a look at the currently used IP addresses in your home on their website ("Mijn Telenet"). Typically addresses from .0 up to .249 are handed out by DHCP, which is why our default is 250.  
-- Subnet: This is typically 192.168.0.0/24. This depends on your in-house setup / Telecom provider. 
+- Subnet: This is typically 192.168.0.0/24. This depends on your in-house setup / Telecom provider
+- Gateway IP: This is typically 192.168.0.1 or the .1 address in another chosen subnet. 
+
 
 Once this config is submitted it will be saved to the SD card in the config.json file. 
 
