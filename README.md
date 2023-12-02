@@ -14,7 +14,7 @@ The P1 port is disabled by default and can be opened through an action on the we
 The monitoring is done using an ESP32 board for which the software is here. 
 In the board sections below the needed hardware connections to an RJ12 cable that one can plug into the power meter P1 port are described per supported ESP32 board. You need an RJ12 cable with 6 wires, called: 6P6C, not 6P4C
 
-Detailed measurements per quarter are stored on an SDCard in JSON format. Hence we focus on boards that have the SDCard reader integrated, leaving other options open. Use an 8GB micro SD card or up to 64GB (only tested up to 16GB). It is best to reformat the SD Card first and choose a small cluster size because the stored files are all small. 
+Detailed measurements per quarter are stored on a micro SD card in JSON format. Hence we focus on boards that have the SD card reader integrated, but leaving other options open. Use an 8GB micro SD card or up to 64GB (only tested up to 16GB). It is best to reformat the SD card first and choose a small cluster size because the stored files are all small. 
 
 The board is connected to Wifi and exposes a web interface, meant for in-home access only (HTTP), on which one can see the current measurements almost in real-time (updated every 5 seconds by default) or navigate to historical measurements.
 
@@ -23,7 +23,6 @@ The measurements are shown per fixed quarter in the hour because the average wat
 One can easily jump back to the details of the quarter causing the month peak by pressing the "month peak" button if the monitor measured that quarter. 
 
 ![](doc/app/month_peak_viewing.png)
-
 
 The source code can deal with multiple boards in theory. In practice, the LilyGo TTGO T8 ESP32-C3 board is mostly used and thus certainly working. It is also the most power-efficient.
 
@@ -41,12 +40,12 @@ See specific board sections below for their hardware-specific setup.
 
 To get a working board, you need to build and upload the filesystem image and the C/C++ code. (Do this with Platform IO Project Tasks). There might be board-specific actions needed to get it in a state where the items can be uploaded over the USB cable. 
 
-Make sure there is an SD card plugged into the board. 
+Make sure there is a micro SD card plugged into the board. 
 
 
 # Using the board with the installed code
 ## First startup or startup with Wifi connection problems
-Upon first startup, the board will try to locate Wifi connection parameters from the config.json file on the SDCard. 
+Upon first startup, the board will try to locate Wifi connection parameters from the config.json file on the micro SD card. 
 If this file doesn't exist or the board cannot connect to the Wifi network, it will start in configuration mode and act as an access point for a Wifi network "DigitaleMeterMonitor". This uses an IP Subnet 192.168.4.0/24 on which the board has the IP 192.168.4.1.
 As such one can connect to that Wifi network and browse to http://192.168.4.1 to configure the Wifi settings.
 Sometimes it is difficult to stay on the board's network since it has no path to the internet. In the configuration, the board will require a :
@@ -185,10 +184,10 @@ and you can start debugging/changing the html and javascript code as you wish.
 
 # Board specifics
 ## TTGO T8 ESP32-C3
-See: [LilyGo ESP32-C3 board with SDCard interface](https://www.lilygo.cc/products/t8-c3)   
+See: [LilyGo ESP32-C3 board with SD card interface](https://www.lilygo.cc/products/t8-c3)   
 See: [NL Supplier link](https://www.tinytronics.nl/shop/en/development-boards/microcontroller-boards/with-wi-fi/lilygo-ttgo-t8-c3-esp32-c3-4mb-flash)
 
-This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SDCard interface. 
+This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SD card interface. 
 
 - One needed to install special Serial USB drivers and reboot the PC or laptop first before the connection was even recognized as a serial port...
   See: [Espressif page](https://docs.espressif.com/projects/esp-idf/en/v5.0.2/esp32c3/get-started/establish-serial-connection.html)
@@ -230,10 +229,10 @@ This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SDCard interfa
 
 ## TTGO T8 ESP32-S2
 > **Warning**
-> There is still a problem with this board to access the SDCard properly   
+> There is still a problem with this board to access the SD card properly   
 
 See: [LilyGo supplier](https://www.lilygo.cc/products/esp32-s2)   
-See: [Tinytronics supplier in NL for the ESP32-S2 board with SDCard interface](https://www.tinytronics.nl/shop/nl/development-boards/microcontroller-boards/met-wi-fi/lilygo-ttgo-t8-esp32-s2-met-sd-kaart-slot)   
+See: [Tinytronics supplier in NL for the ESP32-S2 board with SD card interface](https://www.tinytronics.nl/shop/nl/development-boards/microcontroller-boards/met-wi-fi/lilygo-ttgo-t8-esp32-s2-met-sd-kaart-slot)   
 See: [Github examples ](https://github.com/Xinyuan-LilyGO/ESP32_S2)
 
 
