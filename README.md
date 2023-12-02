@@ -1,78 +1,104 @@
-[![nl](https://img.shields.io/badge/lang-nl-yellow.svg)](README.nl.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](README.en.md)
 
-# Digital power meter monitor
-The digital power meter monitor is for power meters installed in Belgium. It can measure and show the current or past power measurements in real-time on your phone or PC/laptop.
-Screenshots are in Dutch: 
+# Digitale meter monitor
+De digitale meter monitor is vooral bedoeld voor slimme meters in België. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Belgisch). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
+
+De grootste verschillen met de metingen die je kan zie op de side van een netbeheerder zoals Fluvius zijn: 
+- Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. Elke 5 seconden wordt er een meeting bijgehouden.   
+- De huidige metingen kunnen direct worden getoond. Je moet dus geen dag wachten op je netbeheerder om je verbruik te kunnen raadplegen. 
+- De monitor is een locale "in-huis" toepassing die geen cloud software gebruikt. 
+
 
 ![](doc/app/current_measurement_viewing.png)
 
-The digital power meter has a "P1 port" through which the measurements can be received. 
-> Using the "S1 port" will likely destroy the monitor. 
+De slimme digitale meter heeft een "P1 poort" langswaar de metingen kunnen ontvangen worden. 
+> Gebruik de monitor nooit met de "S1 poort" omdat deze wellicht de monitor zal vernietigen.  
 
 ![](doc/ports_digital_meter.png)
 
-The P1 port is disabled by default and can be opened through an action on the website of your network operator (like Fluvius) typically. However, it can take days for it to get activated. 
+De P1 poort werkt niet zonder deze open te zetten via de website van je network operator (zoals Fluvius). Het kan enige dagen duren voor een "open zetten" effectief in werking komt. 
 
-The monitoring is done using an ESP32 board for which the software is here. 
-In the board sections below the needed hardware connections to an RJ12 cable that one can plug into the power meter P1 port are described per supported ESP32 board. You need an RJ12 cable with 6 wires, called: 6P6C, not 6P4C
+Het monitoren wordt gedaan door een ESP32 bordje waarvoor je de software hier vindt. 
+In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connectie zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
+> **OPGEPAST**: Verbind nooit het bordje met de digitale meter en met een USB kabel. 
 
-Detailed measurements per quarter are stored on a micro SD card in JSON format. Hence we focus on boards that have the SD card reader integrated, but leaving other options open. Use an 8GB micro SD card or up to 64GB (only tested up to 16GB). It is best to reformat the SD card first and choose a small cluster size because the stored files are all small. 
+Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
 
-The board is connected to Wifi and exposes a web interface, meant for in-home access only (HTTP), on which one can see the current measurements almost in real-time (updated every 5 seconds by default) or navigate to historical measurements.
+De gebruikte borden hebben Wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP - u dient met Wifi op het thuis netwerk geconnecteerd te zijn). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
 
-The measurements are shown per fixed quarter in the hour because the average watt consumption per quarter can be penalized by higher electricity costs when they exceed 2500 Watts. One incurs an additional cost of approximately 4 euros (as of the 2023 reference) for each additional 1000 Watts on the highest quarter-average consumption per month. This pertains to the capacity tariff, known as 'capaciteits tarief' in Dutch."
+De metingen worden getoont per vaste kwartieren in het uur. Dit omdat het gemiddeld verbruik per kwartier gepenaliseerd kan worden door extra verbruikskosten voor gemiddelden hoger dan 2500 Watt. Er is een extra kost van ongeveer 4 euro (referentie 2023) per extra 1000 Watts boven 2500 Watt voor het hoogste gemiddelde kwartier verbruik in een maand. Dit is het zogenoemde capaciteits tarief. 
 
-One can easily jump back to the details of the quarter causing the month peak by pressing the "month peak" button if the monitor measured that quarter. 
+Men kan gemakkelijk navigeren naar de details van dit hoogste kwartier in de huidige maand indien de monitor toen ook gemeten heeft, door op de "Maand piek" knop te duwen. 
 
 ![](doc/app/month_peak_viewing.png)
 
-The source code can deal with multiple boards in theory. In practice, the LilyGo TTGO T8 ESP32-C3 board is mostly used and thus certainly working. It is also the most power-efficient.
+De bron code kan in theorie overweg met verschillende borden. In de praktijk is het LilyGo TTGO T8 ESP32-C3 bord het meest gebruikt en werkt dit dus zeker. Het is ook het meest energie efficientste bord. 
 
 
-# Using the source code
-Make sure you have Visual Studio Code with "Platform IO" installed as an ESP coding environment. 
-Platform IO has an alien-like icon on the left side of Visual Studio Code to activate it. 
-Clicking on it, you should be able to see the "PIO Home" tab. 
+# De bron code gebruiken 
+Zorg dat je "Visual Studio Code" met "Platform IO" geinstallerd hebt als ESP programeer omgeving.  
+Platform IO heeft een ufo-achtig icoon op de linker zijde van VSCode om het te activeren.  
+Klik je hierop zou je het het "PIO Home" menu kunnen zien en zo de "PIO Home" tab kunnen openen. 
 
-Clicking on the project should show a tab per target hardware device. 
+Klik je daar op dit project, dan zou je er een tab per board type moeten vinden.  
 
-For example: "TTGO_T8_ESP32_C3"  
+Bij voorbeeld: "TTGO_T8_ESP32_C3"  
 
-See specific board sections below for their hardware-specific setup.
+Zie de specifieke bord sectie verder in het document om naar hun hardware specifieke setup te kijken. 
 
-To get a working board, you need to build and upload the filesystem image and the C/C++ code. (Do this with Platform IO Project Tasks). There might be board-specific actions needed to get it in a state where the items can be uploaded over the USB cable. 
+Om een bordje werkende te krijgen moet je de code EN het filesysteem bouwen/builden en uploaden (beiden). Doe dit met Platform IO Project Tasks. Er kunnen bord specifieke actie zijn om het bord in program/upload mode te krijgen. Uiteindelijk zou je het bordje, met een USB kabel verbonden aan een PC, moeten kunnen programmeren.  
 
-Make sure there is a micro SD card plugged into the board. 
-
-
-# Using the board with the installed code
-## First startup or startup with Wifi connection problems
-Upon first startup, the board will try to locate Wifi connection parameters from the config.json file on the micro SD card. 
-If this file doesn't exist or the board cannot connect to the Wifi network, it will start in configuration mode and act as an access point for a Wifi network "DigitaleMeterMonitor". This uses an IP Subnet 192.168.4.0/24 on which the board has the IP 192.168.4.1.
-As such one can connect to that Wifi network and browse to http://192.168.4.1 to configure the Wifi settings.
-Sometimes it is difficult to stay on the board's network since it has no path to the internet. In the configuration, the board will require a :
-- Wifi network / SSID to connect to
-- Wifi network password
-- IPAddress: The board needs a fixed IPAddress for in-home use (No DHCP). Choose a free address in your home network, typically ending in a high value. Our default is 192.168.0.250. If you have Telenet as an ISP Provided you can have a look at the currently used IP addresses in your home on their website ("Mijn Telenet"). Typically addresses from .0 up to .249 are handed out by DHCP, which is why our default is 250.  
-- Subnet: This is typically 192.168.0.0/24. This depends on your in-house setup / Telecom provider
-- Gateway IP: This is typically 192.168.0.1 or the .1 address in another chosen subnet. 
+Zorg er ook voor dat er een micro SD card in het bordje zit. 
 
 
-Once this config is submitted it will be saved to the SD card in the config.json file. 
+# Gebruik het bord met de geinstalleerde code en data
+## Eerste opstart of opstart waarbij geen Wifi connectie mogelijk was
+Verwijder een mogelijke aangesloten USB kabel van het bordje. 
+Klik de RJ12 connector van je digitale meter monitor in de P1 poort van je digitale meter. 
+Je zou nu een LED moeten zien branden. Is dit niet het geval check dan of je P1 poort wel "open" staat op de website van je netbeheerder (Fluvius).
 
-The board will then reset and attempt to connect to the Wifi. 
+> **OPGEPAST** : Verbind het bordje nooit met de digitale meter EN met een USB kabel. Het bordje wordt door de Digitale meter gevoed. 
 
-Upon startup, the onboard LED will light up bright in several sequences. 
-Eventually, the onboard LED should dim. This means it started up ok and is awaiting data from the digital power meter. 
-If the board is connected to the digital power meter using the RJ12 cable (see pinout and connection schemas for each board in sections below), the dimmed LED should even pulsate a couple of times per second. This indicates the measurements are coming in. 
+> **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en aan een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en Wifi configuratie is dan ook mogelijk. 
 
-## Viewing the measurements
-If the board is running you should be able to contact it on its IP address over HTTP. By default browse to http://192.168.0.250. You should then see the measurements. 
+Bij een eerste opstart zal het bordje Wifi connectie parameters proberen ophalen van het config.json bestand op de micro SD card. 
+Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. Het bordje krijgt dan een IP adres in dit netwerk van 192.168.4.1 en dit in een netwerk 192.168.4.0/24. 
+Eens verbonden kan je dus surfen naar http://192.168.4.1 alwaar je de Wifi configuratie kan doen voor toekomstige opstarts. 
+> Soms is het moeilijk om op het "DigitaleMeterMonitor" netwerk te geraken en te blijven omdat er geen internet verbinding is in deze configuratie mode. 
 
-## Alternative Wifi config
-An alternative way to configure the board to proper Wifi is to power it off, unmount the SD card from it and put it in a laptop/PC from where you can edit the config.json. 
+De configuratie bestaat uit :
+- Wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
+Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor. 
+> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk geeft of kan geven. Voor Telenet kan je op "Mijn Telenet" de Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
 
-The config.json looks like:
+> Gebruik ook een Wifi netwerk dat altijd aanblijft staan ! 
+
+- Wifi netwerk passwoord
+- IP adres: Het bord/de monitor heeft een vast IP adres nodig voor in-huis gebruik. Automatisch adres toekenning (DHCP) is bewust niet ondersteund. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
+> Als je een Telenet internet provider hebt kan je in "Mijn Telenet" kijken welke toestellen al IP adressen hebben. Alsook zal de Telenet modem typisich automatisch adressen uit delen aan toestellen resulterend in mogelijks gebruikte IP adressen eindigend op .2 tot .249 (en niet hoger). Dit is waarom onze default op .250 eindigt.  
+- Subnet: Dit is typisch 192.168.0.0/24. Het kan echter van je thuis setup afhangen of van je internet provider setup.
+- Gateway IP: Dit is typisch 192.168.0.1 of het .1 adress in je subnet. 
+
+Eens deze configuratie doorgegeven is wordt ze opgeslagen in het config.json bestand op de micro SD card.  
+
+Het bordje zal vervolgens herstarten en met de geconfigureerde Wifi proberen connecteren. 
+
+Bij opstart zal een een LED fel beginnen branden om vervolgens verschillende oplicht sequenties door te gaan. 
+Uiteindelijk zal de LED slechts een beetje oplichten. Dit is goed nieuws. Het bordje kon zich verbinden met de Wifi en is klaar om metingen te ontvangen van de digitale meter.
+Lukt dit niet kijk dan hieronder naar "Alternatieve Wifi configuratie".
+
+Als het bord geconnecteerd is met de P1 poort op je digitale meter (zonder ook de USB kabel aan te houden) zou de gedimde LED enkele keren per seconde moeten knipperen. Dit geeft aan dat er metingen binnen komen.
+
+## Metingen bekijken 
+Als het bordje werkt zou je het moeten kunnen contacteren met je GSM, laptop of PC via een browser (bijvoorbeeld chrome) via HTTP. 
+Standaard is dat op http://192.168.0.250 of vervang hierin het IP adres dat je configureerde. 
+Je zou dan metingen moeten kunnen zien.
+Je moet ook wel geconnecteerd zijn op het zelfde thuis-netwerk. (Dat kan typische via kabel of een Wifi netwerk van je huis)  
+
+## Alternatieve Wifi configuratie
+Een alternatieve manier om de Wifi configuratie te doen is om het bordje te ontkoppelen zodat het niet werkt, er de micro SD card uit te halen, deze in een laptop/PC te steken (typisch met een adaptor; alsook niet elke laptop/PC heeft een SD card slot...). Je kan dan het config.json bestand wijzigen (of wegdoen). 
+
+Het config.json bestand heeft het volgende formaat: 
 ````
 {
   "wifi": {
@@ -87,12 +113,13 @@ The config.json looks like:
 }
 ````
 
-Change what you want, save, properly unmount the card from the laptop/PC and remount it on the board. 
-Connect the board. 
+Wijzig dus wat je wil, sla op, ontkoppel de SD card proper van het besturing systeem van je laptop/PC en steek het kaartje weer in het bordje. 
+Koppel het bordje weer aan op de digitale meter OF via een USB kabel. 
 
-## Debug the startup with the serial monitor
-Upon trouble with startup, one can also use the Platform IO serial monitor to see what the board is doing upon startup. 
-If monitored serially it emits messages like:
+## Debug de opstart met een seriele monitor
+Wanneer je nog problemen hebt met de opstart dan kan je de seriele monitor van Visual Studio Code met "Platform IO" extensie gebruiken om te zien wat het bord probeert te doen tijdens de opstart. 
+
+De seriele monitoring ziet er bij een eerst opstart ongeveer alsvolgt uit: 
 
   ````
   Digital meter monitor using board: LilyGo TTGO T8 ESP32 C3 V1.1
@@ -117,12 +144,11 @@ If monitored serially it emits messages like:
   Connect IP:
   192.168.4.1
   ````
+De pin waarden zullen verschillen per bord type. 
 
-The pin values will vary per board type. 
+In dit voorbeeld start het bordje op in "configuratie mode" en maakt het bordje het "DigitaleMeterMonitor" netwerk hiervoor.  
 
-In this example, the device starts up as an access point with an SSID "DigitaleMeterMonitor". 
-
-When the Wifi is connecting fine you will see on the debug terminal:
+Wanneer de Wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
   ````
   Digital meter monitor using board: LilyGo TTGO T8 ESP32 C3 V1.1
   LED pin: 3
@@ -156,35 +182,47 @@ When the Wifi is connecting fine you will see on the debug terminal:
   --------------------------------
 ````
 
-After the board has software and can connect to Wifi, it can be upgraded by browsing to:
+Nadat het bord een eerste maal software en een filesystem image heeft gehad en kan connecteren op Wifi kan het worden geupgrade door te surfen naar:
 ````
 http://<ipaddress>/update
 ````
 
-This gives you a user interface where build output files can be uploaded for code or data(file system), as needed. 
+Als gebruiker krijg je updates toegezonden met instucties die je via deze weg kan uploaden naar het bordje. 
 
-# Web application development
-The data folder contains the files for the web application. 
-These files are put in the flash filesystem on the ESP board. This file system is also known as little FS. 
-Your main interest will be the index.html file. 
-This gets current and historic data using HTTP GET calls like: 
-- GET http://&lt;ip&gt;/current/quarter 
+Als programeur kan je eigen builds maken van de code of van het filesysteem en deze op het bordje zetten op afstand. 
+
+
+# Web interface ontwikkeling
+De "data" folder bevat bestanden voor de web applicatie op het bordje.
+
+Deze bestanden worden op een flash file systeem gezet van het ESP bordje. Dit filesysteem is ook gekend als "little FS".
+
+Je hoofdinteresse zal het index.html bestand zijn als ontwikkelaar. 
+De code hierin krijgt huidige, historisch en maand piek data via de volgede HTTP GETs:  
+- GET http://&lt;ip&gt;/current/quarter
+  Dit komt uit het RAM geheugen. 
 - GET http://&lt;ip&gt;>/meter/2023/12/01/1615W.json
+  Dit komt uit de micro SD card. 
 - GET http://&lt;ip&gt;>/current/month/peak
+  Dit komt uit het RAM geheugen. 
 
-The index.html page detects when it is served from localhost. In this case, it does the above GET calls to 192.168.0.250 so a functioning board plugged in your home digital power meter can serve the requests. This facilitates debugging because you can change the index.html file faster on the laptop/PC, save it and reload it in your browser to see the change effect. 
-It does mean that the index.html file needs to be served from the laptop/PC. 
-To do this, there is a python httpserver.py file in the data folder which can be run. 
-To start service index.html on the local port 8000:
+De index.html pagina detecteerd wanneer ze gehost wordt vanaf een localhost server. In dit geval doet het GETs naar 192.168.0.250, alwaar mogelijks een functioneel bord aanwzig is al dan niet ingeplugd op de digitale meter. 
+Dit faciliteerd debuggen omdat je zo gemakkelijk het index.html bestand kan wijzigen (zonder een file systeem build te maken) en de wijziging uit te proberen. 
+Het wil wel zeggen dan je een http server moet draaien op je laptop/PC.  
+Om dit te doen is er een Python httpserver.py bestand in de data folder die kan worden gelopen. 
+Om te starten op locale poort 8000:
 ````
   cd data
   python httpserver.py
 ````
-You need a version of Python installed. Tested with Python 3.11.1 on a Windows PC. 
+Je hebt hier natuurlijk een Python installatie voor nodig ! Dit is getest met Python 3.11.1 op een Windows PC. 
 
-After this you can browse to: 
+Hierna kan je surfen naar: 
 http://localhost:8000
-and you can start debugging/changing the html and javascript code as you wish. 
+en kan je beginnen debuggen of wijzigingen doen in de html structuur of the javascript code zoals je wil. 
+
+
+> **TODO** : het stuk hieronder moet nog vertaald worden:
 
 # Board specifics
 ## TTGO T8 ESP32-C3
