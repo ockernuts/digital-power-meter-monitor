@@ -67,7 +67,7 @@ const int SD_CARD_MOSI = 11;
 const int SD_CARD_SS = 10;
 // not sure if the above works... see: https://www.reddit.com/r/esp32/comments/wy880v/anyone_got_sd_card_running_on_ttgo_t8/
 // only needed when battery powerred ? 
-// const int POWER_LED_AND_SD_CARD = 14;
+const int POWER_LED_AND_SD_CARD = 14;
 
 #define BOARD_NAME "LilyGo TTGO T8 ESP32 S2 V1.1"
 
@@ -99,9 +99,13 @@ extern void InitDsmrSerial();
 
 
 // Led animation related methods
-#define LED_STRENGTH 2
+#define LED_STRENGTH 4
+#define LED_STRENGHT_STARTUP 16
+#define LED_STRENGHT_ERROR 32
 #define LED_ANIMATION_TIME_IN_MS 100
 extern void initLed();
 extern void loopLed();
 extern void setLedOn(bool async=true, int animation_time=LED_ANIMATION_TIME_IN_MS, int strength=LED_STRENGTH);
 extern void setLedOff(bool async=true, int animation_time=LED_ANIMATION_TIME_IN_MS, int strength=LED_STRENGTH);
+
+extern void morseOut(int pin, const char * text, int strenght=LED_STRENGHT_STARTUP);

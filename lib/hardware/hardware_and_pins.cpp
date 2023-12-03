@@ -48,4 +48,91 @@ void setLedOff(bool async, int animation_time, int strength) {
     }
 }
 
+#define DOT_TIME 150
+#define DASH_TIME 3*DOT_TIME
+#define INTER_DASH_OR_DOT_SLEEP DOT_TIME
+#define INTER_CHARACTER_SLEEP 3*DOT_TIME
+#define INTER_WORD_SLEEP 7*DOT_TIME
+
+constexpr const char *ONE= ".----";
+constexpr const char *TWO = "..---";
+constexpr const char *THREE = "...--";
+constexpr const char *FOUR = "...._";
+constexpr const char *FIVE = ".....";
+constexpr const char *SIX = "-....";
+constexpr const char *SEVEN = "--...";
+constexpr const char *EIGHT = "---...";
+constexpr const char *NINE = "----.";
+constexpr const char *ZERO = "-----";
+
+const char *morse_az[26] = { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....",
+                             "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", 
+                             "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
+
+const char * morse_numbers[10] = {ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE};
+
+void morseDash(int pin, int strenght) {
+    analogWrite(pin,strenght);
+    delay(DASH_TIME);
+    analogWrite(pin,0);
+}
+
+void morseDot(int pin, int strenght) {
+    analogWrite(pin,strenght);
+    delay(DOT_TIME);
+    analogWrite(pin,0);
+}
+
+void morseCharacterCodeOut(int pin, const char * code, int strength) {
+    int size= strlen(code);
+    for (int i=0; i<size; i++) {
+       Serial.print(code[i]);
+       if (i>0) delay(INTER_DASH_OR_DOT_SLEEP);
+       if (code[i] == '.') {
+          morseDot(pin, strength);
+       } else if (code[i] == '-') {
+          morseDash(pin, strength);
+       } else {
+          sleep(14*DOT_TIME); // program error condition, unknown, just wait long. 
+       }
+    }
+}
+
+void morseChar(int pin, char token, int strength) {
+    if (token >='a' && token <='z') {
+        morseCharacterCodeOut(pin, morse_az[token - 'a'], strength);
+    }  else if (token >= 'A' && token <= 'Z') {
+        morseCharacterCodeOut(pin, morse_az[token - 'A'], strength);
+    }
+    else if (token >='0' && token <='9') {
+        morseCharacterCodeOut(pin, morse_numbers[token-'0'], strength);
+    } else if (token == ' ') {
+        delay(INTER_WORD_SLEEP);
+    }
+}
+void morseInterchar() {
+    delay(INTER_CHARACTER_SLEEP);
+}
+
+void morseInterWord() {
+    delay(INTER_WORD_SLEEP);
+}
+
+void morseOut(int pin, const char *text, int strenght) {
+    Serial.print(text);
+    Serial.print(" -> outputing on led in morse code:");
+    int size = strlen(text);
+    for(int i=0; i<size; i++) {
+        if (i>0 && text[i]!=' ') morseInterchar();
+        if (text[i] == ' ') {
+            morseInterWord();
+            Serial.print(" ");
+        }
+        morseChar(pin, text[i], strenght);
+    }
+    morseInterWord();
+    Serial.println(" -- done !");
+}
+
+
 

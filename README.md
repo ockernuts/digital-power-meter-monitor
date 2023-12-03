@@ -83,9 +83,13 @@ Eens deze configuratie doorgegeven is wordt ze opgeslagen in het config.json bes
 
 Het bordje zal vervolgens herstarten en met de geconfigureerde Wifi proberen connecteren. 
 
-Bij opstart zal een een LED fel beginnen branden om vervolgens verschillende oplicht sequenties door te gaan. 
+Bij opstart zal de LED eerst langsaam beginnen branden en uitdovern. 
+Dan zal de LED "hi" knipperen in mose code: '.... ..'.  
 Uiteindelijk zal de LED slechts een beetje oplichten. Dit is goed nieuws. Het bordje kon zich verbinden met de Wifi en is klaar om metingen te ontvangen van de digitale meter.
 Lukt dit niet kijk dan hieronder naar "Alternatieve Wifi configuratie".
+De LED zal "wifi" knipperen in morse code: '.-- .. ..-. ..' en dit herhalen tot er configuratie gedaan is. 
+
+Als er een probleem is met de SD card tijdens opstart zal de LED "sos" knipperen in morse code: '... --- ...' en met een hogere lichtsterkte. 
 
 Als het bord geconnecteerd is met de P1 poort op je digitale meter (zonder ook de USB kabel aan te houden) zou de gedimde LED enkele keren per seconde moeten knipperen. Dit geeft aan dat er metingen binnen komen.
 
@@ -270,9 +274,6 @@ This is a LilyGO TTGO T8 ESP32-C3 module, which has an integrated SD card interf
 
 
 ## TTGO T8 ESP32-S2
-> **Warning**
-> There is still a problem with this board to access the SD card properly   
-
 See: [LilyGo supplier](https://www.lilygo.cc/products/esp32-s2)   
 See: [Tinytronics supplier in NL for the ESP32-S2 board with SD card interface](https://www.tinytronics.nl/shop/nl/development-boards/microcontroller-boards/met-wi-fi/lilygo-ttgo-t8-esp32-s2-met-sd-kaart-slot)   
 See: [Github examples ](https://github.com/Xinyuan-LilyGO/ESP32_S2)
@@ -286,7 +287,11 @@ This is a board that holds an interface to put in a micro SD card.
   When the Connector is to the left of the board, the switch positions are: UP, DOWN, UP, DOWN
   This corresponds to "USB" mode (slave mode -> your PC is the master)
   In another position one gets OTG mode (master mode, the board is an USB master and it can support other devices) 
-  We never use the OTG mode. 
+  We never use the OTG mode.
+  From what we can deduce OTG mode would interfere with the use of PIN 19 as an output signal for RTS. 
+
+- Very special on this board is to get the SDCard working, one needs to set PIN 14 to HIGH. 
+  This is not so visible on the schema, but otherwise, the V3V pin has no proper voltage and this also powers the SDCard...We spent some days finding this out...
  
 After programming the board with the filesystem and code, it should start normally. 
 

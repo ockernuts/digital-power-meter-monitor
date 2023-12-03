@@ -48,24 +48,25 @@ SDCardConfigPersistency configPersistency;
 // It uses a "displayer" abstractor for its output
 MyWifiManager wifiManager(server, displayer, configPersistency);
 
-#define STARTUP_LED_STRENGHT 32
 
 void setup() {
   Serial.begin(115200); // DEBUG OUT
   initLed();
-  // Give 3 seconds so the monitorring pc can open the serial port for monitorring. 
-  // In the meantime, animate the led. 
-  setLedOn(/* not async */false, 3000, STARTUP_LED_STRENGHT);
+  setLedOn(false, 1000, LED_STRENGHT_STARTUP);
+  setLedOff(false, 1000, LED_STRENGHT_STARTUP);
+  // Send 'Hello' in morse. This also gives time for the monitorring pc can open the serial port. 
+  morseOut(LED, "Hi"); // .... ..
    
   // Only after 3 seconds, show info. 
   Serial.printf("Digital meter monitor using board: %s\n", BOARD_NAME);
   Serial.printf("LED pin: %d\n", LED);
 
 #ifdef TTGO_T8_ESP32_S2  
-  pinMode(LED+1, OUTPUT);
-  digitalWrite(LED+1, HIGH);
+  // Special needed for the T8 ESP32S2 board: the V3V pin only awakens if PIN 14 is set high. 
+  // Otherwise the SD card slot doesn't get any power... Hard to write...
+  pinMode(POWER_LED_AND_SD_CARD, OUTPUT);
+  digitalWrite(POWER_LED_AND_SD_CARD, HIGH);
 #endif  
-  setLedOff(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
   Serial.println("Ports used for SD Card communication:");
   Serial.print("MOSI: ");
   Serial.println(SD_CARD_MOSI);
@@ -74,23 +75,19 @@ void setup() {
   Serial.print("SCK: ");
   Serial.println(SD_CARD_SCK);
   Serial.print("SS: ");
-  Serial.println(SD_CARD_SS);  
-
-  setLedOn(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
+  Serial.println(SD_CARD_SS); 
+ 
   if (!setupSDCard(displayer)) {
-    setLedOff(/*not async*/false, 200, STARTUP_LED_STRENGHT);
-    delay(500);
+    morseOut(LED, "sos", LED_STRENGHT_ERROR); // ... --- ...
+    Serial.println("Resetting !");
+    delay(1000);
     ESP.restart();
   }
 
   InitDsmrSerial();
-
-
-  setLedOff(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
-  setLedOn(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
+  
   if (!wifiManager.Init()) {
-    setLedOff(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
-    delay(500);
+    morseOut(LED, "wifi"); // .-- .. ..-. ..
     // Init is not done... Wifi needs to be resetup through HTTP asynchronously.
     // So we return earlier to the "loop", which will check that we are not running in normal mode and eventually
     // Reset the ESP after it has been reconfigurred.
@@ -100,23 +97,8 @@ void setup() {
     return; // -> starts loop ! 
   }
 
-  setLedOn(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
   setupTimeSync(displayer);
   sdCardLogStartup();
-  setLedOff(/*not async*/ false, 200, STARTUP_LED_STRENGHT);
-  
-  
-
-#ifndef TTGO_T8_ESP32_S2
-  // displayer.println("Telegram startup... ");
-  // myBot.begin() ? displayer.println("OK") : displayer.println("NOK");
-  // {
-  //  char welcome_msg[64];
-  //  snprintf(welcome_msg, sizeof(welcome_msg), "BOT @%s online\n/help all commands avalaible.", myBot.getBotName());
-  //  myBot.sendTo(userid, welcome_msg);
-  //}
-  // delay(2000);
-#endif
 
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   InitHttpHandlers(server);
@@ -133,10 +115,13 @@ void setup() {
 
 
 void loop() {
-  // animate led, needs a fast loop. 
-  loopLed();
+  if (wifiManager.LoopWifiReconfigPending())  {
+    morseOut(LED, "wifi"); // this will cause a repeated out: .-- .. ..-. ..
+    return;
+  }
 
-  if (wifiManager.LoopWifiReconfigPending()) return;
+  // animate led for normal operation, needs a fast loop. 
+  loopLed();
 
   // We need a quick loop when results are still being read from the meter. 
   struct P1Data returned_data = {};
@@ -145,13 +130,12 @@ void loop() {
     return; // -> not enough data yet-> early return to shorten loop -> wait for enough data 
   }
 
+  // Set led off before handling data to save on power and to delay a bit. 
+  setLedOff(/* async*/false); // takes a while
   // We have data !
   GetFixedQuarterPowerHistoryAccumulator().ProcessNewSample(returned_data);
-  // TODO We better use a scheduler for this. (schedule Reader enable 100ms later) 
-  setLedOff(/* async*/false);
-
-
+  
   // At the end of the loop, we enable the meter output again (RTS), so we get a burst of new serial data to process. 
   GetP1Reader().enable(true);
-  setLedOn();
+  setLedOn(); // direct, async via loopLed(). 
 }
