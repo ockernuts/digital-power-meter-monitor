@@ -18,14 +18,6 @@
 #include <ezLED.h>
 #include "sdcardconfigpersistency.h"
 
-// We wrapped the panic printer to be able to log to file...
-void __real_panic_print_char(const char c);
-
-void __wrap_panic_print_char(const char c) {
-  // sdcard_panic_print_char(c);
-  __real_panic_print_char(c);
-}
-
 WiFiClientSecure client;
 
 AsyncWebServer server(80);
@@ -41,12 +33,14 @@ PrintDisplayer displayer(Serial);
 PrintDisplayer displayer(Serial1);
 #endif
 
-// Choose Persistency layer for config (EEPROM or SDCard) -> something implementing IWifiConfigPersistency
+// Choose Persistency layer for config -> something implementing IWifiConfigPersistency
 SDCardConfigPersistency configPersistency; 
+// Former persistency (only for beta users-upgrade case)
+EepromConfigPersistency formerConfigPersistency;
 
 // The wifi manager will help us with initial IP setup. 
 // It uses a "displayer" abstractor for its output
-MyWifiManager wifiManager(server, displayer, configPersistency);
+MyWifiManager wifiManager(server, displayer, configPersistency, &formerConfigPersistency ); 
 
 
 void setup() {

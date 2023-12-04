@@ -1,3 +1,4 @@
+#pragma once
 #include <FS.h>
 #include <FSImpl.h>
 #include <SdFat.h>

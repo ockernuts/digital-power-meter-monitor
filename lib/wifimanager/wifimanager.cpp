@@ -31,8 +31,10 @@ void setupDNSD(){
 // Initialization if static wifiConfigInfo member. (otherwise linker error).
 WifiConfigInfo MyWifiManager::wifiConfigInfo;
 
-MyWifiManager::MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency) :
-    restartNeeded(false), server(server), displayer(displayer), configPersistency(configPersistency)
+MyWifiManager::MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency, 
+                             IWifiConfigPersistency *formerConfigPersistency) :
+    restartNeeded(false), server(server), displayer(displayer), configPersistency(configPersistency), 
+    formerConfigPersistency(formerConfigPersistency)
 {
 }
 
@@ -186,8 +188,12 @@ bool MyWifiManager::GetPreviousConfigAndValidateOrSetDefaults() {
   wifiConfigInfo.ApplyIPConfig(); 
 
   if (!configPersistency.Load(wifiConfigInfo)) {
-    displayer.println("No prior WIFI config");
-    return false; 
+    if (!formerConfigPersistency || !formerConfigPersistency->Load(wifiConfigInfo)) {
+      displayer.println("No prior WIFI config");
+      return false; 
+    }
+    // Upgrade case from formerConfigPersistency for beta users. 
+    configPersistency.Save(wifiConfigInfo);
   }
   return true;
 }
