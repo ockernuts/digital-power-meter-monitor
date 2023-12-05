@@ -35,4 +35,5 @@ class IWifiConfigPersistency {
   public: 
     virtual bool Load(WifiConfigInfo &) = 0;
     virtual void Save(const WifiConfigInfo &) = 0; 
+    virtual void Erase();
 };

@@ -69,9 +69,14 @@ const int SD_CARD_SS = 10;
 // only needed when battery powerred ? 
 const int POWER_LED_AND_SD_CARD = 14;
 
+#define SD_CARD_INIT sd.begin(SD_CARD_SS)
+
 #define BOARD_NAME "LilyGo TTGO T8 ESP32 S2 V1.1"
 
-#define SD_CARD_INIT sd.begin(SD_CARD_SS)
+// The boot button can be used to remove/wipe the Wifi config and restart.
+#define ENABLE_BOOT_BUTTON_WIFI_RESET
+#define BOOT_BUTTON 0 
+
 #endif
 
 #ifdef TTGO_T8_ESP32_C3
@@ -89,6 +94,10 @@ const int SD_CARD_SS = 6;
 #define SD_CARD_INIT sd.begin(SD_CARD_SS)
 
 #define BOARD_NAME "LilyGo TTGO T8 ESP32 C3 V1.1"
+
+// The boot button can be used to remove/wipe the Wifi config and restart.
+#define ENABLE_BOOT_BUTTON_WIFI_RESET
+#define BOOT_BUTTON 9 
 
 #endif
 

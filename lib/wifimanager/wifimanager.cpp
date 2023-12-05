@@ -106,6 +106,10 @@ const char* PARAM_INPUT_5 = "subnet";
 bool MyWifiManager::Init() {
   InitFS();
 
+#ifdef ENABLE_BOOT_BUTTON_WIFI_RESET
+  pinMode(BOOT_BUTTON, INPUT_PULLUP);
+#endif
+
   if (AttemptAutoConnect()) return true;
 
   // Wifi needs to be reconfigurred. Setup an access poin to fetch the configuration.
@@ -280,6 +284,28 @@ bool MyWifiManager::LoopWifiReconfigPending() {
     dnsServer->processNextRequest();
     return true;
   }
+
+#ifdef ENABLE_BOOT_BUTTON_WIFI_RESET
+  static unsigned long start_boot_button_down_ms = 0; 
+  if (!digitalRead(BOOT_BUTTON)) {
+    if (start_boot_button_down_ms == 0) {
+      start_boot_button_down_ms = millis();
+      displayer.println("Detected factory reset button pressed, hold for 20 seconds to engage");
+      return false; 
+    }
+    if ( (millis()-start_boot_button_down_ms) > 20000) {
+      displayer.println("Erasing Wifi Config");
+      configPersistency.Erase();
+      morseOut(LED, "factory reset");
+      ESP.restart();
+    }
+  } else {
+    if (start_boot_button_down_ms) {
+      displayer.println("Release factory reset button");
+    }
+    start_boot_button_down_ms = 0; 
+  }  
+#endif
 
   return false;
 }

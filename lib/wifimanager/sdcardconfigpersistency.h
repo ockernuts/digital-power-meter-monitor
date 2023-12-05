@@ -98,6 +98,10 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
             f.close();
             return; 
         }
+
+        virtual void Erase() {
+            sd.remove(CONFIG_FILE);
+        }
     
     private:
     /*
@@ -146,6 +150,14 @@ class EepromConfigPersistency : public IWifiConfigPersistency {
             EEPROM.begin(sizeof(EEPROM_CHECK) + sizeof(WifiConfigInfo) + WIFI_CONFIG_ADDRESS);
             EEPROM.put(WIFI_CONFIG_ADDRESS, check);
             EEPROM.put(WIFI_CONFIG_ADDRESS + sizeof(EEPROM_CHECK), info);
+            EEPROM.end();
+        }
+
+        virtual void Erase() {
+            struct EEPROM_CHECK check;
+            EEPROM.begin(sizeof(EEPROM_CHECK) + WIFI_CONFIG_ADDRESS);
+            check.eeprom_check[0]=0; // Screw up. 
+            EEPROM.put(WIFI_CONFIG_ADDRESS, check);
             EEPROM.end();
         }
 };
