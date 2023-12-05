@@ -1,15 +1,11 @@
 #include <Arduino.h>
 #include "sd_card.h"
-#include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
 #include <SPI.h>
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include "wifimanager.h"
-#include "adafruit_gfx_displayer.h"
 #include "print_displayer.h"
 #include "timesync.h"
 #include "hardware_and_pins.h"
@@ -18,16 +14,10 @@
 #include <ezLED.h>
 #include "sdcardconfigpersistency.h"
 
-WiFiClientSecure client;
-
 AsyncWebServer server(80);
 
-#if PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_TFT 
-// We use a TFT 1.3 SCREEN without CS.
-// It
-Adafruit_ST7789 tft = Adafruit_ST7789(-1 /* NO CS */, TFT_DC, TFT_RST);
-AdafruitGfxDisplayer displayer(tft);
-#elif PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL
+
+#if PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL
 PrintDisplayer displayer(Serial);
 #elif PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL1
 PrintDisplayer displayer(Serial1);
