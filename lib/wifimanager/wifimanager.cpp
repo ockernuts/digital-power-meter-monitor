@@ -11,6 +11,7 @@
 #include "idisplayer.h"
 #include "hardware_and_pins.h"
 
+const unsigned long millisTimeoutForWifiReconfigUponConnectFailure = 1000 * 60 * 5; // 5 minutes
 
 // dnsServer is made when WifiReconfig needs to happen and the ESP becomes Access Point.
 // This also indicates reconfig is pending.
@@ -33,7 +34,8 @@ WifiConfigInfo MyWifiManager::wifiConfigInfo;
 
 MyWifiManager::MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency, 
                              IWifiConfigPersistency *formerConfigPersistency) :
-    restartNeeded(false), server(server), displayer(displayer), configPersistency(configPersistency), 
+    restartNeeded(false), configPresent(false), wifiConfigModeStart(0), server(server), displayer(displayer),
+    configPersistency(configPersistency), 
     formerConfigPersistency(formerConfigPersistency)
 {
 }
@@ -193,6 +195,7 @@ bool MyWifiManager::GetPreviousConfigAndValidateOrSetDefaults() {
       return false; 
     }
     // Upgrade case from formerConfigPersistency for beta users. 
+    displayer.println("Recoverred WIFI config, saving");
     configPersistency.Save(wifiConfigInfo);
   }
   return true;
@@ -202,6 +205,8 @@ bool MyWifiManager::AttemptAutoConnect()
 {
   // Try to read previous config values from EEPROM or SDCARD
   if (!GetPreviousConfigAndValidateOrSetDefaults()) return false;
+
+  
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
@@ -235,6 +240,14 @@ bool MyWifiManager::AttemptAutoConnect()
   }
   if( status != WL_CONNECTED) {
       displayer.errorln("Failed to connect.");
+      // Mark there was a Wifi Config. This can be an important difference for how long the Wifi Config mode 
+      // is usable. This is important because a bad Wifi connect below might be on a powerloss in the home. 
+      // The telecom equipment might need some time to establish the network again...
+      // Hence not being able to connect with a saved wifi config deserves a restart 
+      // after a while to try to reconnect...
+      displayer.println("Limiting Wifi Reconfig in time to retry Wifi connect with stored config");
+      configPresent = true; 
+      wifiConfigModeStart = millis();
       delay(2000);
       return false;
   }
@@ -254,6 +267,13 @@ bool MyWifiManager::LoopWifiReconfigPending() {
     displayer.println("Restarting in 5 seconds");
     delay(5000);
     ESP.restart();
+  }
+
+  if (configPresent && (millis()-wifiConfigModeStart)>millisTimeoutForWifiReconfigUponConnectFailure) {
+    displayer.println("Timeout reached on Wifi Reconfig after saved Wifi could not connect");
+    displayer.println("Restarting in 5 seconds");
+    delay(5000);
+    ESP.restart(); 
   }
 
   if (dnsServer) {

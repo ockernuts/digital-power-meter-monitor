@@ -12,30 +12,23 @@
 #include "idisplayer.h"
 #include <ESPAsyncWebServer.h>
 
-
-// TODO:
-// Use preferences instead of EEPROM on ESP32
-
-
 // Using an OWN Wifi Manager to :
 // - Have progress though a "displayer" adaptor, to a TFT screen or a serial port or any printer...
 // - Have own HTML pages (in LittleFS).
 // - Use Async Web Server
-// - Use own parameter storage so more can be stored that the SDK does for Wifi.
+// - Use own parameter storage so more can be stored than what the SDK does for Wifi.
+//   -> Storing Wifi config on SD Card is more flexibility: 
+//      gives easier option to do debugging/reset/forces reconfig
 //   Hence we don't use the SDK SmartConfig....
-
-
-
-
-
 
 class MyWifiManager
 {
 private:
   static WifiConfigInfo wifiConfigInfo;
   
-
   bool restartNeeded; // Set after in AP mode configuration is set.
+  bool configPresent; // Set when an Wifi Config was persisted. 
+  unsigned long wifiConfigModeStart;
 
   AsyncWebServer& server;
   IDisplayer &displayer;

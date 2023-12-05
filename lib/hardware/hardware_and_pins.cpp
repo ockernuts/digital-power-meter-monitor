@@ -120,18 +120,21 @@ void morseInterWord() {
 
 void morseOut(int pin, const char *text, int strenght) {
     Serial.print(text);
-    Serial.print(" -> outputing on led in morse code:");
+    Serial.print(" -> blinking morse code:");
     int size = strlen(text);
     for(int i=0; i<size; i++) {
-        if (i>0 && text[i]!=' ') morseInterchar();
+        if (i>0 && text[i]!=' ') {
+            morseInterchar();
+            Serial.print(" ");
+        }
         if (text[i] == ' ') {
             morseInterWord();
-            Serial.print(" ");
+            Serial.print("  ");
         }
         morseChar(pin, text[i], strenght);
     }
     morseInterWord();
-    Serial.println(" -- done !");
+    Serial.println("");
 }
 
 
