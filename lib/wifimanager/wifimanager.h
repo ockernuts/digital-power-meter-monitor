@@ -34,11 +34,8 @@ private:
   IDisplayer &displayer;
   IWifiConfigPersistency &configPersistency; 
 
-  IWifiConfigPersistency *formerConfigPersistency; 
-
 public:
-  MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency,
-                IWifiConfigPersistency *formerConfigPersistency = NULL);
+  MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency);
   virtual ~MyWifiManager();
 
   bool Init();

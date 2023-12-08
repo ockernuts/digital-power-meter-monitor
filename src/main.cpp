@@ -24,13 +24,11 @@ PrintDisplayer displayer(Serial1);
 #endif
 
 // Choose Persistency layer for config -> something implementing IWifiConfigPersistency
-SDCardConfigPersistency configPersistency; 
-// Former persistency (only for beta users-upgrade case)
-EepromConfigPersistency formerConfigPersistency;
+SDCardConfigPersistency configPersistency;
 
 // The wifi manager will help us with initial IP setup. 
 // It uses a "displayer" abstractor for its output
-MyWifiManager wifiManager(server, displayer, configPersistency, &formerConfigPersistency ); 
+MyWifiManager wifiManager(server, displayer, configPersistency); 
 
 
 void setup() {
@@ -71,7 +69,7 @@ void setup() {
   InitDsmrSerial();
   
   if (!wifiManager.Init()) {
-    morseOut(LED, "wifi"); // .-- .. ..-. ..
+    morseOut(LED, "WiFi", LED_STRENGHT_ERROR);
     // Init is not done... Wifi needs to be resetup through HTTP asynchronously.
     // So we return earlier to the "loop", which will check that we are not running in normal mode and eventually
     // Reset the ESP after it has been reconfigurred.
@@ -99,13 +97,16 @@ void setup() {
 
 
 void loop() {
+  // animate led for normal operation, needs a fast loop. 
+  loopLed();
+
   if (wifiManager.LoopWifiReconfigPending())  {
-    morseOut(LED, "wifi"); // this will cause a repeated out: .-- .. ..-. ..
+    // It is not a good idea to animate things here and cause delays,
+    // because the wifimanager needs to be able to answer DNS requests...
     return;
   }
 
-  // animate led for normal operation, needs a fast loop. 
-  loopLed();
+
 
   // We need a quick loop when results are still being read from the meter. 
   struct P1Data returned_data = {};

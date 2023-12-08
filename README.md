@@ -1,5 +1,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.en.md)
 
+Een gebruikers handleiding vind je hier: [Handleiding digitale meter monitor](https://docs.google.com/document/d/1RkHZzj7mp43RBCmY2G-Qf7itILN3JXueGeSpXl7rKZQ/edit?usp=sharing).
+
 # Digitale meter monitor
 De digitale meter monitor is vooral bedoeld voor slimme meters in België. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Belgisch). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
 
@@ -55,15 +57,17 @@ Zorg er ook voor dat er een micro SD card in het bordje zit.
 ## Eerste opstart of opstart waarbij geen Wifi connectie mogelijk was
 Verwijder een mogelijke aangesloten USB kabel van het bordje. 
 Klik de RJ12 connector van je digitale meter monitor in de P1 poort van je digitale meter. 
-Je zou nu een LED moeten zien branden. Is dit niet het geval check dan of je P1 poort wel "open" staat op de website van je netbeheerder (Fluvius).
+Je zou nu een LED moeten zien branden. Is dit niet het geval check dan of je P1 poort wel "open" staat op de website van je netbeheerder (Fluvius). Het kan ook enkele dagen duren voor de poort werkt
 
 > **OPGEPAST** : Verbind het bordje nooit met de digitale meter EN met een USB kabel. Het bordje wordt door de Digitale meter gevoed. 
 
-> **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en aan een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en Wifi configuratie is dan ook mogelijk. 
+> **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en met een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en Wifi configuratie is dan ook mogelijk. 
 
 Bij een eerste opstart zal het bordje Wifi connectie parameters proberen ophalen van het config.json bestand op de micro SD card. 
-Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. Het bordje krijgt dan een IP adres in dit netwerk van 192.168.4.1 en dit in een netwerk 192.168.4.0/24. 
-Eens verbonden kan je dus surfen naar http://192.168.4.1 alwaar je de Wifi configuratie kan doen voor toekomstige opstarts. 
+Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. 
+Dit kan ook automatisch gaan danzij mDNS die nu ook wordt ingesteld. 
+Het bordje krijgt in deze mode trouwens een IP adres in een eigen netwerk van 192.168.4.1 en dit is een 192.168.4.0/24 netwerk. 
+Eens verbonden kan je dus surfen naar http://digimon.local of http://192.168.4.1 alwaar je de Wifi configuratie kan doen voor toekomstige opstarts. 
 > Soms is het moeilijk om op het "DigitaleMeterMonitor" netwerk te geraken en te blijven omdat er geen internet verbinding is in deze configuratie mode. 
 
 De configuratie bestaat uit :
@@ -74,10 +78,13 @@ Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor.
 > Gebruik ook een Wifi netwerk dat altijd aanblijft staan ! 
 
 - Wifi netwerk passwoord
-- IP adres: Het bord/de monitor heeft een vast IP adres nodig voor in-huis gebruik. Automatisch adres toekenning (DHCP) is bewust niet ondersteund. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
-> Als je een Telenet internet provider hebt kan je in "Mijn Telenet" kijken welke toestellen al IP adressen hebben. Alsook zal de Telenet modem typisich automatisch adressen uit delen aan toestellen resulterend in mogelijks gebruikte IP adressen eindigend op .2 tot .249 (en niet hoger). Dit is waarom onze default op .250 eindigt.  
-- Subnet: Dit is typisch 192.168.0.0/24. Het kan echter van je thuis setup afhangen of van je internet provider setup.
-- Gateway IP: Dit is typisch 192.168.0.1 of het .1 adress in je subnet. 
+- Naam van het toesten (mDNS naam / naam op het netwerk)
+- Standaard wordt er dan IP configuratie gedaan met DHCP. 
+- Men kan ook manual IP adres configuratie doen:  
+  - IP adres: Het bord/de monitor heeft dan een vast IP adres. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
+  > Als je een Telenet internet provider hebt kan je in "Mijn Telenet" kijken welke toestellen al IP adressen hebben. Alsook zal de Telenet modem typisich automatisch adressen uit delen aan toestellen resulterend in mogelijks gebruikte IP adressen eindigend op .2 tot .249 (en niet hoger). Dit is waarom onze default op .250 eindigt.  
+  - Subnet: Dit is typisch 192.168.0.0/24. Het kan echter van je thuis setup afhangen of van je internet provider setup.
+  - Gateway IP: Dit is typisch 192.168.0.1 of het .1 adress in je subnet. 
 
 Eens deze configuratie doorgegeven is wordt ze opgeslagen in het config.json bestand op de micro SD card.  
 
@@ -110,6 +117,8 @@ Het config.json bestand heeft het volgende formaat:
     "password": "yourPassword"
   },
   "network": {
+    "dhcp": false, 
+    "device_name": "digimon",
     "ip" : "192.168.0.250",
     "gateway": "192.168.0.1",
     "subnet": "255.255.255.0"
@@ -188,7 +197,7 @@ Wanneer de Wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
 
 Nadat het bord een eerste maal software en een filesystem image heeft gehad en kan connecteren op Wifi kan het worden geupgrade door te surfen naar:
 ````
-http://<ipaddress>/update
+http://digimon.local/update
 ````
 
 Als gebruiker krijg je updates toegezonden met instucties die je via deze weg kan uploaden naar het bordje. 

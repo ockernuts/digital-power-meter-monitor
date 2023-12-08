@@ -21,6 +21,18 @@ READ+VALIDATE / WRITE a json like:
   }
 }
 
+or 
+{
+  "wifi": {
+    "ssid": "yourSSID",
+    "password": "yourPassword"
+  },
+  "network": {
+    "dhcp" : true",
+    "device_name": "digimon",
+  }
+}
+
 */
 
 // FIELDS:
@@ -28,6 +40,8 @@ constexpr const char *WIFI = "wifi";
 constexpr const char *SSID = "ssid";
 constexpr const char *PASSWORD = "password";
 constexpr const char *NETWORK = "network";
+constexpr const char *DHCP = "dhcp";
+constexpr const char *DEVICE_NAME = "device_name";
 constexpr const char *IP = "ip";
 constexpr const char *GATEWAY = "gateway";
 constexpr const char *SUBNET = "subnet";
@@ -63,14 +77,32 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
             const char *ssid = wifi[SSID];
             const char *password = wifi[PASSWORD];
             const JsonObject& network = doc[NETWORK];
-            const char *ip = network[IP];
-            const char *subnet = network[SUBNET];
-            const char *gateway = network[GATEWAY];
+            bool dhcp = false;
+            
+            const char *subnet = NULL;
+            const char *gateway = NULL;
+
+            if (network.containsKey(DHCP)) {
+                dhcp = network[DHCP];
+                info.ApplyIPConfig();
+            }
+            else {
+                const char *ip = network[IP];
+                const char *subnet = network[SUBNET];
+                const char *gateway = network[GATEWAY];
+                info.ApplyIPConfig(ip, gateway, subnet);
+            } 
+            info.dhcp = dhcp;
+    
+            const char *device_name = network[DEVICE_NAME];
+            if (device_name != NULL) {
+                strncpy(info.device_name, device_name, sizeof(info.device_name));
+            } else {
+                strncpy(info.device_name, DEFAULT_DEVICE_NAME, sizeof(info.device_name));
+            }
 
             strncpy(info.ssid, ssid, sizeof(info.ssid));
             strncpy(info.pwd, password, sizeof(info.pwd));
-
-            info.ApplyIPConfig(ip, gateway, subnet);
             return true;
             
         }
@@ -88,6 +120,8 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
             network[IP] = ip;
             network[GATEWAY] = gateway;
             network[SUBNET] = subnet;
+            network[DEVICE_NAME] = info.device_name;
+            network[DHCP] = info.dhcp; 
 
             File32 f = sd.open(CONFIG_FILE, O_CREAT | O_WRONLY);
             if (!f) {
@@ -121,43 +155,4 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
         };
     */
 
-};
-
-#define WIFI_CONFIG_ADDRESS 0
-#define EEPROM_CHECK_VALUE  "NUT1WIM"
-
-struct EEPROM_CHECK {
-    char eeprom_check[8] = EEPROM_CHECK_VALUE;
-};
-
-class EepromConfigPersistency : public IWifiConfigPersistency {
-    public: 
-        virtual bool Load(WifiConfigInfo& info) {
-            struct EEPROM_CHECK check; 
-            EEPROM.begin(sizeof(EEPROM_CHECK) + sizeof(WifiConfigInfo) + WIFI_CONFIG_ADDRESS);
-            EEPROM.get(WIFI_CONFIG_ADDRESS, check);
-            if (strncmp(check.eeprom_check, EEPROM_CHECK_VALUE, sizeof(check.eeprom_check)) != 0) {
-                EEPROM.end();
-                return false; 
-            }
-            EEPROM.get(WIFI_CONFIG_ADDRESS + sizeof(EEPROM_CHECK), info);
-            EEPROM.end();
-            return true;
-        }
-
-        virtual void Save(const WifiConfigInfo& info) {
-            struct EEPROM_CHECK check; 
-            EEPROM.begin(sizeof(EEPROM_CHECK) + sizeof(WifiConfigInfo) + WIFI_CONFIG_ADDRESS);
-            EEPROM.put(WIFI_CONFIG_ADDRESS, check);
-            EEPROM.put(WIFI_CONFIG_ADDRESS + sizeof(EEPROM_CHECK), info);
-            EEPROM.end();
-        }
-
-        virtual void Erase() {
-            struct EEPROM_CHECK check;
-            EEPROM.begin(sizeof(EEPROM_CHECK) + WIFI_CONFIG_ADDRESS);
-            check.eeprom_check[0]=0; // Screw up. 
-            EEPROM.put(WIFI_CONFIG_ADDRESS, check);
-            EEPROM.end();
-        }
 };

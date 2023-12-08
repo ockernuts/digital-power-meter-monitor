@@ -10,6 +10,7 @@
 #include <DNSServer.h>
 #include "idisplayer.h"
 #include "hardware_and_pins.h"
+#include <ESPmDNS.h>
 
 const unsigned long millisTimeoutForWifiReconfigUponConnectFailure = 1000 * 60 * 5; // 5 minutes
 
@@ -32,11 +33,9 @@ void setupDNSD(){
 // Initialization if static wifiConfigInfo member. (otherwise linker error).
 WifiConfigInfo MyWifiManager::wifiConfigInfo;
 
-MyWifiManager::MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency, 
-                             IWifiConfigPersistency *formerConfigPersistency) :
+MyWifiManager::MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency) :
     restartNeeded(false), configPresent(false), wifiConfigModeStart(0), server(server), displayer(displayer),
-    configPersistency(configPersistency), 
-    formerConfigPersistency(formerConfigPersistency)
+    configPersistency(configPersistency)
 {
 }
 
@@ -78,6 +77,24 @@ String MyWifiManager::WifiSetupPageProcessor(const String& var) {
     IPAddress SN(wifiConfigInfo.subnet);
     return SN.toString();
   }
+  if (var == "SELECTED_DHCP") {
+    if (wifiConfigInfo.dhcp) {
+      return String("Selected");
+    } else {
+      return String();
+    }
+  }
+  if (var == "SELECTED_NO_DHCP") {
+    if (wifiConfigInfo.dhcp) {
+      return String();
+    } else {
+      return String("Selected");
+    }
+  }
+  if (var == "DEVICE_NAME") {
+    return String(wifiConfigInfo.device_name);
+  }
+  
   return String(); // @suppress("Ambiguous problem")
 }
 
@@ -102,6 +119,8 @@ const char* PARAM_INPUT_2 = "pass";
 const char* PARAM_INPUT_3 = "ip";
 const char* PARAM_INPUT_4 = "gateway";
 const char* PARAM_INPUT_5 = "subnet";
+const char* PARAM_DEVICE_NAME = "device_name";
+const char* PARAM_IP_CONFIG = "ip_config";
 
 bool MyWifiManager::Init() {
   InitFS();
@@ -117,6 +136,7 @@ bool MyWifiManager::Init() {
   displayer.newPage("     Setup Mode");
   WiFi.disconnect(true);
   
+ 
   // NULL sets an open Access Point
   WiFi.softAP("DigitaleMeterMonitor", NULL);
   setupDNSD();
@@ -131,10 +151,20 @@ bool MyWifiManager::Init() {
 
   // Setup Wifi manager HTTP page and post handler to reconfigure the Wifi.
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    Serial.println("Sending wifi config page");
     request->send(LittleFS, "/wifimanager.html", "text/html", false, WifiSetupPageProcessor );
   });
 
-  server.serveStatic("/", LittleFS, "/");
+  server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send(200, "text/html", "");
+  });
+
+  server.onNotFound([](AsyncWebServerRequest *request){
+    Serial.println("Sending wifi config page on not found");
+    request->send(LittleFS, "/wifimanager.html", "text/html", false, WifiSetupPageProcessor );
+  });
+
+  server.serveStatic("/style.css", LittleFS, "/style.css");
 
   server.on("/", HTTP_POST, [this](AsyncWebServerRequest *request) {
     // One cannot use yield, delay and appearantly certain tft display actions here...
@@ -171,12 +201,21 @@ bool MyWifiManager::Init() {
           SN.fromString(p->value());
           for (int i=0; i<4; i++) { wifiConfigInfo.subnet[i] = SN[i]; }
         }
+        if (p->name() == PARAM_IP_CONFIG) {
+          wifiConfigInfo.dhcp =  p->value() =="dhcp";
+        }
+        if (p->name() == PARAM_DEVICE_NAME) {
+          strncpy(wifiConfigInfo.device_name, p->value().c_str(), sizeof(wifiConfigInfo.device_name));
+        }
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
       }
     }
-
     SaveWifiConfig();
-    request->send(200, "text/plain", "The device will restart. Decouple from this wifi network and connect to you normal network.");
+    char message[250];
+    snprintf(message, sizeof(message), "<head></head><body>De monitor herstart nu. Verbind je weer met een thuis netwerk en probeer na een tijdje deze link: "
+                                       "<A HREF='http://%s.local'>http://%s.local</A> om de monitor te bereiken</body>",
+                                       wifiConfigInfo.device_name,wifiConfigInfo.device_name);
+    request->send(200, "text/html", message);
     restartNeeded = true;
   });
   return false;
@@ -191,16 +230,13 @@ bool MyWifiManager::GetPreviousConfigAndValidateOrSetDefaults() {
   // First set defaults
   strncpy(wifiConfigInfo.ssid, "", sizeof(wifiConfigInfo.ssid));
   strncpy(wifiConfigInfo.pwd, "", sizeof(wifiConfigInfo.pwd));
+  strncpy(wifiConfigInfo.device_name, DEFAULT_DEVICE_NAME, sizeof(wifiConfigInfo.device_name));
+  wifiConfigInfo.dhcp = true;
   wifiConfigInfo.ApplyIPConfig(); 
 
   if (!configPersistency.Load(wifiConfigInfo)) {
-    if (!formerConfigPersistency || !formerConfigPersistency->Load(wifiConfigInfo)) {
       displayer.println("No prior WIFI config");
       return false; 
-    }
-    // Upgrade case from formerConfigPersistency for beta users. 
-    displayer.println("Recoverred WIFI config, saving");
-    configPersistency.Save(wifiConfigInfo);
   }
   return true;
 }
@@ -212,23 +248,31 @@ bool MyWifiManager::AttemptAutoConnect()
 
   
 
+  WiFi.setHostname(wifiConfigInfo.device_name);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
 
-  IPAddress IP(wifiConfigInfo.ip);
-  IPAddress GW(wifiConfigInfo.gateway);
-  IPAddress SN(wifiConfigInfo.subnet);
-  IPAddress DNS;
-  DNS.fromString("8.8.8.8");
-  if (!WiFi.config(IP, GW, SN, DNS)){
-    displayer.errorln("Wifi config failure");
-    // resets the IP, gateway, subnet to defaults in memory only, for a new setup through HTML
-    wifiConfigInfo.ApplyIPConfig();
-    return false;
+  if (!wifiConfigInfo.dhcp) {
+    IPAddress IP(wifiConfigInfo.ip);
+    IPAddress GW(wifiConfigInfo.gateway);
+    IPAddress SN(wifiConfigInfo.subnet);
+    IPAddress DNS;
+    DNS.fromString("8.8.8.8");
+    displayer.print("Previous IP:");
+    displayer.println(IP.toString().c_str());
+    
+    if (!WiFi.config(IP, GW, SN, DNS)){
+      displayer.errorln("Wifi config failure");
+      // resets the IP, gateway, subnet to defaults in memory only, for a new setup through HTML
+      wifiConfigInfo.ApplyIPConfig();
+      return false;
+    }      
   }
+
 
   displayer.println("Previous SSID:");
   displayer.println(wifiConfigInfo.ssid);
+  if (wifiConfigInfo.dhcp) displayer.println("DHCP mode");
   displayer.println("");
   wl_status_t status = WiFi.begin(wifiConfigInfo.ssid, wifiConfigInfo.pwd);
 
@@ -258,6 +302,12 @@ bool MyWifiManager::AttemptAutoConnect()
 
   displayer.println("Connected !");
   displayer.println(WiFi.localIP().toString().c_str());
+  displayer.println(WiFi.getHostname());
+
+  if (!MDNS.begin(wifiConfigInfo.device_name)) { 
+    displayer.println("Error setting up mDNS");
+  }
+  MDNS.addService("http", "tcp", 80);
   return true;
 }
 
@@ -296,7 +346,7 @@ bool MyWifiManager::LoopWifiReconfigPending() {
     if ( (millis()-start_boot_button_down_ms) > 20000) {
       displayer.println("Erasing Wifi Config");
       configPersistency.Erase();
-      morseOut(LED, "factory reset");
+      morseOut(LED, "bye");
       ESP.restart();
     }
   } else {

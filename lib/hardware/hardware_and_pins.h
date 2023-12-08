@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <ezLED.h>
 
 
 #define OUTPUT_TYPE_TFT 1
@@ -118,3 +119,5 @@ extern void setLedOn(bool async=true, int animation_time=LED_ANIMATION_TIME_IN_M
 extern void setLedOff(bool async=true, int animation_time=LED_ANIMATION_TIME_IN_MS, int strength=LED_STRENGTH);
 
 extern void morseOut(int pin, const char * text, int strenght=LED_STRENGHT_STARTUP);
+
+extern ezLED* g_led; 

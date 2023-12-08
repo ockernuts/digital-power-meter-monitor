@@ -48,14 +48,20 @@ Make sure there is a micro SD card plugged into the board.
 # Using the board with the installed code
 ## First startup or startup with Wifi connection problems
 Upon first startup, the board will try to locate Wifi connection parameters from the config.json file on the micro SD card. 
-If this file doesn't exist or the board cannot connect to the Wifi network, it will start in configuration mode and act as an access point for a Wifi network "DigitaleMeterMonitor". This uses an IP Subnet 192.168.4.0/24 on which the board has the IP 192.168.4.1.
-As such one can connect to that Wifi network and browse to http://192.168.4.1 to configure the Wifi settings.
+If this file doesn't exist or the board cannot connect to the Wifi network, it will start in configuration mode and act as an access point for a Wifi network "DigitaleMeterMonitor". This uses an IP Subnet 192.168.4.0/24 on which the board has the IP 192.168.4.1
+We now also support mDNS which makes the monitor reachable via the name digimon.local
+As such one can connect to that Wifi network and browse to http://digimon.local or http://192.168.4.1 to configure the Wifi settings.
+The latter might even give a popup in Windows to easily click-open the Wifi config page. 
+
 Sometimes it is difficult to stay on the board's network since it has no path to the internet. In the configuration, the board will require a :
 - Wifi network / SSID to connect to
 - Wifi network password
-- IPAddress: The board needs a fixed IPAddress for in-home use (No DHCP). Choose a free address in your home network, typically ending in a high value. Our default is 192.168.0.250. If you have Telenet as an ISP Provided you can have a look at the currently used IP addresses in your home on their website ("Mijn Telenet"). Typically addresses from .0 up to .249 are handed out by DHCP, which is why our default is 250.  
-- Subnet: This is typically 192.168.0.0/24. This depends on your in-house setup / Telecom provider
-- Gateway IP: This is typically 192.168.0.1 or the .1 address in another chosen subnet. 
+- Device name (mDNS name / host name)
+- Normally the IP configuration is via DHCP. 
+- One can switch this to manual and then once needs to configure:
+  - IPAddress: The board needs a fixed IPAddress for in-home use (No DHCP). Choose a free address in your home network, typically ending in a high value. Our default is 192.168.0.250. If you have Telenet as an ISP Provided you can have a look at the currently used IP addresses in your home on their website ("Mijn Telenet"). Typically addresses from .0 up to .249 are handed out by DHCP, which is why our default is 250.  
+  - Subnet: This is typically 192.168.0.0/24. This depends on your in-house setup / Telecom provider
+  - Gateway IP: This is typically 192.168.0.1 or the .1 address in another chosen subnet. 
 
 
 Once this config is submitted it will be saved to the SD card in the config.json file. 
@@ -72,7 +78,7 @@ In case wifi is not connectable, the LED will blink "wifi" in morse code: '.-- .
 If there was a problem with the SD card during the startup, the LED will blink "sos" in morse code (... --- ...) with a higher intensity. 
 
 ## Viewing the measurements
-If the board is running you should be able to contact it on its IP address over HTTP. By default browse to http://192.168.0.250. You should then see the measurements. 
+If the board is running you should be able to contact it on its IP address over HTTP. By default browse to http://digimon.local . You should then see the measurements. 
 
 ## Alternative Wifi config
 An alternative way to configure the board to proper Wifi is to power it off, unmount the SD card from it and put it in a laptop/PC from where you can edit the config.json. 
@@ -85,6 +91,8 @@ The config.json looks like:
     "password": "yourPassword"
   },
   "network": {
+    "dhcp": false,
+    "device_name": "digimon", 
     "ip" : "192.168.0.250",
     "gateway": "192.168.0.1",
     "subnet": "255.255.255.0"
@@ -163,7 +171,7 @@ When the Wifi is connecting fine you will see on the debug terminal:
 
 After the board has software and can connect to Wifi, it can be upgraded by browsing to:
 ````
-http://<ipaddress>/update
+http://digimon.local/update
 ````
 
 This gives you a user interface where build output files can be uploaded for code or data(file system), as needed. 
