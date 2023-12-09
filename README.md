@@ -3,7 +3,7 @@
 Een gebruikers handleiding vind je hier: [Handleiding digitale meter monitor](https://docs.google.com/document/d/1RkHZzj7mp43RBCmY2G-Qf7itILN3JXueGeSpXl7rKZQ/edit?usp=sharing).
 
 # Digitale meter monitor
-De digitale meter monitor is vooral bedoeld voor slimme meters in België. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Belgisch). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
+De digitale meter monitor is vooral bedoeld voor slimme meters in Vlaanderen. Mits wat kleine aanpassingen is hij wellicht ook bruikbaar in Nederland. De monitor kan metingen opslaan en de huidige en historische metingen in real-time op je GSM of laptop/PC tonen. De monitor kan ook helpen om een zicht te krijgen op maand pieken die leiden tot een hoger capaciteits tarief (Typisch Vlaams). Voorts is de monitor heel geschikt om je te helpen grote verbruikers en nachtelijke sluimer verbruikers te helpen opsporen. 
 
 De grootste verschillen met de metingen die je kan zien op de site van een netbeheerder zoals Fluvius zijn: 
 - Er worden veel meer details bijgehouden. Je kan zo een detail per kwartier zien om te leren hoe je verbruik verliep. Elke 5 seconden wordt er een meting bijgehouden.   

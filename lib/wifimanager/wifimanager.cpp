@@ -11,6 +11,7 @@
 #include "idisplayer.h"
 #include "hardware_and_pins.h"
 #include <ESPmDNS.h>
+#include "ESP32SSDP.h"
 
 const unsigned long millisTimeoutForWifiReconfigUponConnectFailure = 1000 * 60 * 5; // 5 minutes
 
@@ -308,6 +309,17 @@ bool MyWifiManager::AttemptAutoConnect()
     displayer.println("Error setting up mDNS");
   }
   MDNS.addService("http", "tcp", 80);
+  MDNS.addServiceTxt("http", "tcp", "board", BOARD_NAME);
+  MDNS.enableWorkstation();
+
+
+  // SSDP 
+  server.on("/description.xml", HTTP_GET, [&](AsyncWebServerRequest *request) {
+    request->send(200, "text/xml", SSDP.schema(false));
+  });
+  server.on("/electic-meter.png", HTTP_GET, [](AsyncWebServerRequest *request){
+     request->send(LittleFS, "/electic-meter.png");
+  });
   return true;
 }
 
@@ -358,4 +370,71 @@ bool MyWifiManager::LoopWifiReconfigPending() {
 #endif
 
   return false;
+}
+
+
+void MyWifiManager::PostWebServerStartSSDPInit() {
+  //set schema xml url, nees to match http handler
+  //"ssdp/schema.xml" if not set
+  SSDP.setSchemaURL("description.xml");
+  //set port
+  //80 if not set
+  SSDP.setHTTPPort(80);
+  //set device name
+  //Null string if not set
+  SSDP.setName(wifiConfigInfo.device_name);
+  //set Serial Number
+  //Null string if not set
+  //SSDP.setSerialNumber("001788102201");
+  //set device url
+  //Null string if not set
+  SSDP.setURL("index.html");
+  //set model name
+  //Null string if not set
+  SSDP.setModelName("Digitale Meter Monitor");
+  //set model description
+  //Null string if not set
+  SSDP.setModelDescription("This device can be controled by WiFi");
+  //set model number
+  //Null string if not set
+  SSDP.setModelNumber(BOARD_NAME);
+  //set model url
+  //Null string if not set
+  //SSDP.setModelURL("http://www.meethue.com");
+  //set model manufacturer name
+  //Null string if not set
+  SSDP.setManufacturer("Ockernuts");
+  //set model manufacturer url
+  //Null string if not set
+  SSDP.setManufacturerURL("https://github.com/ockernuts/digital-power-meter-monitor");
+  //set device type
+  //"urn:schemas-upnp-org:device:Basic:1" if not set
+  SSDP.setDeviceType("rootdevice"); //to appear as root device, other examples: MediaRenderer, MediaServer ...
+  //set server name
+  //"Arduino/1.0" if not set
+  SSDP.setServerName(wifiConfigInfo.device_name);
+  //set UUID, you can use https://www.uuidgenerator.net/
+  //use 38323636-4558-4dda-9188-cda0e6 + 4 last bytes of mac address if not set
+  //use SSDP.setUUID("daa26fa3-d2d4-4072-bc7a-a1b88ab4234a", false); for full UUID
+  //SSDP.setUUID("daa26fa3-d2d4-4072-bc7a");
+  //Set icons list, NB: optional, this is ignored under windows
+  SSDP.setIcons(  "<icon>"
+                  "<mimetype>image/png</mimetype>"
+                  "<height>32</height>"
+                  "<width>32</width>"
+                  "<depth>24</depth>"
+                  "<url>electric-meter.png</url>"
+                  "</icon>");
+  //Set service list, NB: optional for simple device
+  /*
+  SSDP.setServices(  "<service>"
+                      "<serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>"
+                      "<serviceId>urn:upnp-org:serviceId:SwitchPower:1</serviceId>"
+                      "<SCPDURL>/SwitchPower1.xml</SCPDURL>"
+                      "<controlURL>/SwitchPower/Control</controlURL>"
+                      "<eventSubURL>/SwitchPower/Event</eventSubURL>"
+                      "</service>");
+  */
+  displayer.print("Starting SSDP...\n");
+  SSDP.begin();
 }

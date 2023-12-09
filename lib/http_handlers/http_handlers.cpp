@@ -5,9 +5,12 @@
 #include "sd_card.h"
 
 void InitHttpHandlers(AsyncWebServer &server) {
-    //if you get here you have connected to the WiFi and you know the time !
+  //if you get here you have connected to the WiFi and you know the time !
   // Start WEBSERVER + Handler ?
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+     request->send(LittleFS, "/index.html");
+   });
+  server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request){
      request->send(LittleFS, "/index.html");
    });
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){

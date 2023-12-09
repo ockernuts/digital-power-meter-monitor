@@ -45,6 +45,8 @@ public:
   // Needs to be called from the main loop method to allow actions.
   bool LoopWifiReconfigPending();
 
+  void PostWebServerStartSSDPInit();
+
   static const char* GetWifiStatusAsString(wl_status_t status);
 
   static String WifiSetupPageProcessor(const String& var);

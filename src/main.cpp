@@ -69,6 +69,7 @@ void setup() {
   InitDsmrSerial();
   
   if (!wifiManager.Init()) {
+    g_led->cancel();
     morseOut(LED, "WiFi", LED_STRENGHT_ERROR);
     // Init is not done... Wifi needs to be resetup through HTTP asynchronously.
     // So we return earlier to the "loop", which will check that we are not running in normal mode and eventually
@@ -86,6 +87,7 @@ void setup() {
   InitHttpHandlers(server);
   AsyncElegantOTA.begin(&server);
   server.begin();
+  wifiManager.PostWebServerStartSSDPInit();
 
   displayer.newPage("Verbruiksmonitor");
 
@@ -101,7 +103,8 @@ void loop() {
   loopLed();
 
   if (wifiManager.LoopWifiReconfigPending())  {
-    // It is not a good idea to animate things here and cause delays,
+    g_led->blink(500,500);
+    // It is not a good idea to animate things here with a delay,
     // because the wifimanager needs to be able to answer DNS requests...
     return;
   }
