@@ -16,7 +16,6 @@
 
 AsyncWebServer server(80);
 
-
 #if PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL
 PrintDisplayer displayer(Serial);
 #elif PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL1
@@ -41,6 +40,8 @@ void setup() {
    
   // Only after 3 seconds, show info. 
   Serial.printf("Digital meter monitor using board: %s\n", BOARD_NAME);
+  Serial.printf("Firmware version: %s\n", AUTO_VERSION);
+  Serial.printf("Build date: %s\n", __TIMESTAMP__);
   Serial.printf("LED pin: %d\n", LED);
 
 #ifdef TTGO_T8_ESP32_S2  
