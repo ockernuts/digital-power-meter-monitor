@@ -65,8 +65,22 @@ bool setupSDCard(IDisplayer& displayer) {
     return false; 
   }
 
-  Serial.printf("SD Card sectorsPerCluster  %d\n", sd.sectorsPerCluster());
+  displayer.println("Reading Card info...");
+  csd_t csd;
+  if (!sd.card()->readCSD(&csd)) {
 
+  }
+  
+  Serial.printf("SD Card size: %.2g GB\n", csd.capacity() * 0.000000512 );
+  Serial.printf("SD Card sectorsPerCluster  %d, so %d KiB\n", sd.sectorsPerCluster(), (sd.sectorsPerCluster()*512)/1024);
+  if (sd.sectorsPerCluster() > 16) {
+    for (int i=0; i<2; i++) {
+      Serial.println("*****************************************");
+      Serial.println("* PLEASE REFORMAT WITH 8KiB Clustersize *");
+      Serial.println("*****************************************");
+      delay(2000);
+    }
+  }
 
   displayer.println("SD Card OK");
  

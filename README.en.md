@@ -17,7 +17,7 @@ The monitoring is done using an ESP32 board for which the software is here.
 In the board sections below the needed hardware connections to an RJ12 cable that one can plug into the power meter P1 port are described per supported ESP32 board. You need an RJ12 cable with 6 wires, called: 6P6C, not 6P4C
 > **WARNING**: Never connect the board with the digital meter and with a USB cable.
 
-Detailed measurements per quarter are stored on a micro SD card in JSON format. Hence we focus on boards that have the SD card reader integrated, but leaving other options open. Use an 8GB to 64GB micro SD card (only tested up to 16GB). It is best to reformat the SD card first and choose a small cluster size (8K for example) because a lot of small files are stored. 
+Detailed measurements per quarter are stored on a micro SD card in JSON format. Hence we focus on boards that have the SD card reader integrated, but leaving other options open. Use an 8GB to 32GB micro SD card (only tested up to 16GB). It is best to reformat the SD card first in FAT32 and choose a small cluster size (8K for example) because a lot of small files are stored. 
 
 The board is connected to WiFi and exposes a web interface, meant for in-home access only (HTTP), on which one can see the current measurements almost in real-time (updated every 5 seconds by default) or navigate to historical measurements.
 
@@ -64,12 +64,15 @@ The latter might even give a popup in Windows to easily click-open the WiFi conf
 
 Sometimes it is difficult to stay on the board's network since it has no path to the internet. In the configuration, the board will require a :
 - WiFi network / SSID to connect to
+> The WiFi network name of the monitor becomes later the username to use to login to the monitor
+
 > Most probably there is a IP network modem with integrated WiFi capabilities in the same technical area of the digital meter. For provider Telenet you can look on "My Telenet" how the wifi is configured, turn is on, determine SSID and the password and so forth. The WiFi capabilities typically cover a 2.4 GHz and a 5.0 GHz. Best use this network, unless there is a closer network.
 
 > Always use a WiFi network that stays on for the monitor ! 
 
 - WiFi network password
-- Device name (mDNS name / host name/ name on the network)
+> This WiFi password will later also be used as the password to login to the monitor
+Device name (mDNS name / host name/ name on the network)
 - Normally the IP configuration is via DHCP. 
 - One can switch this to manual and then once needs to configure:
   - IPAddress: The board needs a fixed IPAddress for in-home use (No DHCP). Choose a free address in your home network, typically ending in a high value. Our default is 192.168.0.250. If you have Telenet as an ISP Provided you can have a look at the currently used IP addresses in your home on their website ("Mijn Telenet"). Typically addresses from .0 up to .249 are handed out by DHCP, which is why our default is 250.  
@@ -93,7 +96,11 @@ If there was a problem with the SD card during the startup, the LED will blink "
 If the board is connected then to the P1 port of the digital meter, the LED should pulsate. This indicates measurements are being received. 
 
 ## Viewing the measurements
-If the board is running you should be able to contact it on its IP address over HTTP. By default browse to http://digimon.local . You should then see the measurements. 
+If the board is running you should be able to contact it on its IP address over HTTP. By default browse to http://digimon.local .
+> Log in with:
+  - Username -> Wifi netwerkname/SSID you configured for the monitor
+  - Password -> Wifi Password you configured for the monitor 
+You should then see the measurements. 
 
 > To see measurements your phone, laptop or PC must be connected to the home network. This can be with WiFi or with a cable. 
 

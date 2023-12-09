@@ -24,7 +24,7 @@ Het monitoren wordt gedaan door een ESP32 bordje waarvoor je de software hier vi
 In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connecties zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
 > **OPGEPAST**: Verbind nooit het bordje met de digitale meter en met een USB kabel. 
 
-Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (8KB bijvoorbeeld; cluster size wordt ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
+Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 32GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren in FAT32 met een kleine cluster grootte (8KB bijvoorbeeld; cluster size wordt ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
 
 De gebruikte borden hebben wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP + u dient met op het thuis netwerk geconnecteerd te zijn, via een kabel of aanwezige wifi's). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
 
@@ -73,12 +73,17 @@ Eens verbonden kan je dus surfen naar http://digimon.local of http://192.168.4.1
 De configuratie bestaat uit :
 - wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
 Dit is best het wifi netwerk dat het dichtstbij is bij de monitor. 
+> De ingestelde wifi netwerk naam (SSID) is later de user om in te loggen op de monitor
+
 > Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een wifi netwerk verzorgt of kan verzorgen. Voor Telenet kan je op "Mijn Telenet" de wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 GHz als een 5 GHz wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
 
 > Gebruik ook een wifi netwerk dat altijd aanblijft staan ! 
 
 - wifi netwerk passwoord
+> Het ingestelde wifi password is later het password om in te loggen op de monitor
 - Naam van het toestel (mDNS naam / naam op het netwerk)
+
+
 - Standaard wordt er dan IP configuratie gedaan met DHCP. 
 - Men kan ook manual IP adres configuratie doen:  
   - IP adres: Het bord/de monitor heeft dan een vast IP adres. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
@@ -102,7 +107,10 @@ Als het bord geconnecteerd is met de P1 poort op je digitale meter (zonder ook d
 
 ## Metingen bekijken 
 Als het bordje werkt zou je het moeten kunnen contacteren met je GSM, laptop of PC via een browser (bijvoorbeeld chrome) via HTTP. 
-Standaard is dat op http://digimon.local 
+Standaard is dat op http://digimon.local
+> Log in met als:
+  - Username -> Wifi netwerknaam/SSID waar de monitor op zit
+  - Passwoord -> Passwoord van de Wifi waar de monitor op zit 
 Je zou dan metingen moeten kunnen zien.
 
 > Je moet ook wel geconnecteerd zijn op het zelfde thuis-netwerk. Dat kan typische via kabel of een wifi netwerk van je huis.  
