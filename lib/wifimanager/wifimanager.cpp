@@ -44,6 +44,14 @@ MyWiFiManager::~MyWiFiManager()
 {
 }
 
+const char *MyWiFiManager::GetSSID() {
+  return wiFiConfigInfo.ssid;
+}
+
+const char *MyWiFiManager::GetPassword() {
+  return wiFiConfigInfo.pwd;
+}
+
 const char* MyWiFiManager::GetWiFiStatusAsString(wl_status_t status) {
   switch (status) {
     case WL_NO_SHIELD: return "WL_NO_SHIELD";
@@ -432,6 +440,6 @@ void MyWiFiManager::PostWebServerStartSSDPInit() {
                       "<eventSubURL>/SwitchPower/Event</eventSubURL>"
                       "</service>");
   */
-  displayer.print("Starting SSDP...\n");
+  displayer.print("Starting Simple Service Discover Protocol ...\n");
   SSDP.begin();
 }

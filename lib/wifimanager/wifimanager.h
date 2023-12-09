@@ -51,6 +51,10 @@ public:
 
   static String WiFiSetupPageProcessor(const String& var);
 
+  const char *GetSSID(); 
+
+  const char *GetPassword();
+
 protected:
   void SaveWiFiConfig();
   bool GetPreviousConfigAndValidateOrSetDefaults();

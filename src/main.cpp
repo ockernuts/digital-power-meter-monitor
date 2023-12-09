@@ -86,8 +86,8 @@ void setup() {
   sdCardLogStartup();
 
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-  InitHttpHandlers(server);
-  AsyncElegantOTA.begin(&server);
+  InitHttpHandlers(server, wiFiManager.GetSSID(), wiFiManager.GetPassword());
+  AsyncElegantOTA.begin(&server, wiFiManager.GetSSID(), wiFiManager.GetPassword());
   server.begin();
   wiFiManager.PostWebServerStartSSDPInit();
 
