@@ -47,9 +47,9 @@ constexpr const char *GATEWAY = "gateway";
 constexpr const char *SUBNET = "subnet";
 
 
-class SDCardConfigPersistency : public IWifiConfigPersistency {
+class SDCardConfigPersistency : public IWiFiConfigPersistency {
     public: 
-        virtual bool Load(WifiConfigInfo& info) {
+        virtual bool Load(WiFiConfigInfo& info) {
             File32 f = sd.open(CONFIG_FILE);
             if (!f.isOpen()) {
                 Serial.printf("No %s file found\n", CONFIG_FILE);
@@ -73,9 +73,9 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
             }
             */
 
-            const JsonObject& wifi = doc[WIFI];
-            const char *ssid = wifi[SSID];
-            const char *password = wifi[PASSWORD];
+            const JsonObject& wiFi = doc[WIFI];
+            const char *ssid = wiFi[SSID];
+            const char *password = wiFi[PASSWORD];
             const JsonObject& network = doc[NETWORK];
             bool dhcp = false;
             
@@ -107,15 +107,15 @@ class SDCardConfigPersistency : public IWifiConfigPersistency {
             
         }
 
-        virtual void Save(const WifiConfigInfo& info) {
+        virtual void Save(const WiFiConfigInfo& info) {
             IPAddress ip(info.ip);
             IPAddress gateway(info.gateway);
             IPAddress subnet(info.subnet);
             StaticJsonDocument<500> doc; 
 
-            JsonObject wifi = doc.createNestedObject(WIFI);
-            wifi[SSID] = info.ssid;
-            wifi[PASSWORD] = info.pwd;
+            JsonObject wiFi = doc.createNestedObject(WIFI);
+            wiFi[SSID] = info.ssid;
+            wiFi[PASSWORD] = info.pwd;
             JsonObject network = doc.createNestedObject(NETWORK);
             network[IP] = ip;
             network[GATEWAY] = gateway;

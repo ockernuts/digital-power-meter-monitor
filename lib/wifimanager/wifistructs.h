@@ -5,7 +5,7 @@ constexpr const char *DEFAULT_GW = "192.168.0.1";
 constexpr const char *DEFAULT_SN = "255.255.255.0";
 constexpr const char *DEFAULT_DEVICE_NAME = "digimon";
 
-struct WifiConfigInfoStruct {
+struct WiFiConfigInfoStruct {
     char ssid[36] = ""; // max 32 characters + zero + pad to next DWORD level.
     char pwd[64] = ""; // max 63 characters + zero
 
@@ -33,11 +33,11 @@ struct WifiConfigInfoStruct {
     }
 };
 
-typedef struct WifiConfigInfoStruct WifiConfigInfo;
+typedef struct WiFiConfigInfoStruct WiFiConfigInfo;
 
-class IWifiConfigPersistency {
+class IWiFiConfigPersistency {
   public: 
-    virtual bool Load(WifiConfigInfo &) = 0;
-    virtual void Save(const WifiConfigInfo &) = 0; 
+    virtual bool Load(WiFiConfigInfo &) = 0;
+    virtual void Save(const WiFiConfigInfo &) = 0; 
     virtual void Erase();
 };

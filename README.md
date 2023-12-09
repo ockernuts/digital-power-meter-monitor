@@ -24,9 +24,9 @@ Het monitoren wordt gedaan door een ESP32 bordje waarvoor je de software hier vi
 In de borden secties verder in dit document wordt de nodige hardware setup beschreven. Dit omvat de connecties met een RJ12 kabel die in de P1 poort gestoken kan worden en het bord. De connecties zijn bord specifiek. Je hebt trouwens een RJ12 kabel nodig met 6 draden, een zogenaamde 6P6C kabel, geen 6P4C kabel. Het bordje krijgt ook de nodige spanning via deze kabel. 
 > **OPGEPAST**: Verbind nooit het bordje met de digitale meter en met een USB kabel. 
 
-Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
+Gedetaileerde metingen per kwartier worden opgeslagen op een micro SD card in JSON formaat. Daarom focussen we ons op hardware borden die een onboard SD card reader hebben. We laten andere opties open. Gebruik een 8GB tot 64GB micro SD card (Enkel getest tot 16GB). Het is best om de SD card eerst te formateren met een kleine cluster grootte (8KB bijvoorbeeld; cluster size wordt ook Allocation size genoemd soms), en dit omdat er veel kleine bestanden opgeslagen worden. 
 
-De gebruikte borden hebben Wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP + u dient met op het thuis netwerk geconnecteerd te zijn, via een kabel of aanwezige Wifi's). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
+De gebruikte borden hebben wifi connectiviteit en deze software bied een web interface aan. Deze web interface is enkel bedoeld voor in-huis toegang (HTTP + u dient met op het thuis netwerk geconnecteerd te zijn, via een kabel of aanwezige wifi's). Op de web interface kan je de huidige metingen bijna in real-time zien. Er zijn updates elke 5 seconden. Je kan ook makkelijk navigeren naar historische metingen. 
 
 De metingen worden getoont per vaste kwartieren in het uur. Dit omdat het gemiddeld verbruik per kwartier gepenaliseerd kan worden door extra verbruikskosten voor gemiddelden hoger dan 2500 Watt. Er is een extra kost van ongeveer 4 euro (referentie 2023) per extra 1000 Watts boven 2500 Watt voor het hoogste gemiddelde kwartier verbruik in een maand. Dit is het zogenoemde capaciteits tarief. 
 
@@ -34,12 +34,12 @@ Men kan gemakkelijk navigeren naar de details van dit hoogste kwartier in de hui
 
 ![](doc/app/month_peak_viewing.png)
 
-De bron code kan in theorie overweg met verschillende borden. In de praktijk is het LilyGo TTGO T8 ESP32-C3 bord het meest gebruikt en werkt dit dus zeker. Het is ook het meest energie efficientste bord. 
+De bron code kan in theorie overweg met verschillende borden. In de praktijk is het LilyGo TTGO T8 ESP32-C3 bord het meest gebruikt en werkt dit dus zeker. Het is ook het meest energie efficientste bord en het goedkoopste. 
 
 
 # De bron code gebruiken 
 Zorg dat je "Visual Studio Code" met "Platform IO" geinstallerd hebt als ESP programeer omgeving.  
-Platform IO heeft een ufo-achtig icoon op de linker zijde van VSCode om het te activeren.  
+Platform IO heeft een alien-achtig icoon op de linker zijde van VSCode om het te activeren.  
 Klik je hierop zou je het het "PIO Home" menu kunnen zien en zo de "PIO Home" tab kunnen openen. 
 
 Klik je daar op dit project, dan zou je er een tab per board type moeten vinden.  
@@ -54,31 +54,31 @@ Zorg er ook voor dat er een micro SD card in het bordje zit.
 
 
 # Gebruik het bord met de geinstalleerde code en data
-## Eerste opstart of opstart waarbij geen Wifi connectie mogelijk was
+## Eerste opstart of opstart waarbij geen wifi connectie mogelijk was
 Verwijder een mogelijke aangesloten USB kabel van het bordje. 
-Klik de RJ12 connector van je digitale meter monitor in de P1 poort van je digitale meter. 
+Klik de RJ12 connect in de P1 poort van je digitale meter. 
 Je zou nu een LED moeten zien branden. Is dit niet het geval check dan of je P1 poort wel "open" staat op de website van je netbeheerder (Fluvius). Het kan ook enkele dagen duren voor de poort werkt
 
 > **OPGEPAST** : Verbind het bordje nooit met de digitale meter EN met een USB kabel. Het bordje wordt door de Digitale meter gevoed. 
 
-> **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en met een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en Wifi configuratie is dan ook mogelijk. 
+> **ALTERNATIEF** : Je kan ook het bordje niet aan de digitale meter hangen, maar deels demonteren en met een USB kabel aan je laptop/PC hangen. Het krijgt dan zo spanning en wifi configuratie is dan ook mogelijk. 
 
-Bij een eerste opstart zal het bordje Wifi connectie parameters proberen ophalen van het config.json bestand op de micro SD card. 
-Als dit bestand niet bestaat of er is geen Wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een Wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. 
+Bij een eerste opstart zal het bordje wifi connectie parameters proberen ophalen van het config.json bestand op de micro SD card. 
+Als dit bestand niet bestaat of er is geen wifi connectie mogelijk, en dan zal het bordje opstarten in "configuratie mode". Het vormt dan zelf een wifi netwerk "DigitaleMeterMonitor" waarop je je kan verbinden met GSM of laptop/PC. 
 Dit kan ook automatisch gaan danzij mDNS die nu ook wordt ingesteld. 
 Het bordje krijgt in deze mode trouwens een IP adres in een eigen netwerk van 192.168.4.1 en dit is een 192.168.4.0/24 netwerk. 
-Eens verbonden kan je dus surfen naar http://digimon.local of http://192.168.4.1 alwaar je de Wifi configuratie kan doen voor toekomstige opstarts. 
+Eens verbonden kan je dus surfen naar http://digimon.local of http://192.168.4.1 alwaar je de wifi configuratie kan doen voor toekomstige opstarts. 
 > Soms is het moeilijk om op het "DigitaleMeterMonitor" netwerk te geraken en te blijven omdat er geen internet verbinding is in deze configuratie mode. 
 
 De configuratie bestaat uit :
-- Wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
-Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor. 
-> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een Wifi netwerk verzorgt of kan verzorgen. Voor Telenet kan je op "Mijn Telenet" de Wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 Ghz als 5 Ghz Wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
+- wifi netwerk / SSID waar het bord zich later mee moet verbinden.    
+Dit is best het wifi netwerk dat het dichtstbij is bij de monitor. 
+> Veelal is er een modem/doos van de internet provider die in dezelfde technische ruimte staat en die ook een wifi netwerk verzorgt of kan verzorgen. Voor Telenet kan je op "Mijn Telenet" de wifi configuratie van de modem bekijken, aanzetten en aanpassen qua netwerk naam (SSID) en passwoord. Dit is typische zowel een 2.4 GHz als een 5 GHz wifi netwerk. Gebruik dan best dit netwerk tenzij er een dichter is. 
 
-> Gebruik ook een Wifi netwerk dat altijd aanblijft staan ! 
+> Gebruik ook een wifi netwerk dat altijd aanblijft staan ! 
 
-- Wifi netwerk passwoord
-- Naam van het toesten (mDNS naam / naam op het netwerk)
+- wifi netwerk passwoord
+- Naam van het toestel (mDNS naam / naam op het netwerk)
 - Standaard wordt er dan IP configuratie gedaan met DHCP. 
 - Men kan ook manual IP adres configuratie doen:  
   - IP adres: Het bord/de monitor heeft dan een vast IP adres. Kies een vrij IP adres in je thuis netwerk, typisch eindigend op een hoge waarde. Standaard gebruiken we 192.168.0.250. 
@@ -88,13 +88,13 @@ Dit is best het Wifi netwerk dat het dichtstbij is bij de monitor.
 
 Eens deze configuratie doorgegeven is wordt ze opgeslagen in het config.json bestand op de micro SD card.  
 
-Het bordje zal vervolgens herstarten en met de geconfigureerde Wifi proberen connecteren. 
+Het bordje zal vervolgens herstarten en met de geconfigureerde wifi proberen connecteren. 
 
 Bij opstart zal de LED eerst langsaam beginnen branden en uitdovern. 
 Dan zal de LED "hi" knipperen in mose code: '.... ..'.  
-Uiteindelijk zal de LED slechts een beetje oplichten. Dit is goed nieuws. Het bordje kon zich verbinden met de Wifi en is klaar om metingen te ontvangen van de digitale meter.
-Lukt dit niet kijk dan hieronder naar "Alternatieve Wifi configuratie".
-De LED zal "wifi" knipperen in morse code: '.-- .. ..-. ..' en dit herhalen tot er configuratie gedaan is. 
+Uiteindelijk zal de LED slechts een beetje oplichten. Dit is goed nieuws. Het bordje kon zich verbinden met de wifi en is klaar om metingen te ontvangen van de digitale meter.
+Lukt dit niet kijk dan hieronder naar "Alternatieve wifi configuratie".
+De LED zal "wifi" knipperen in morse code: '.-- .. ..-. ..' bij het begin van deze mode en dan uit blijven tot er configuratie gedaan is. 
 
 Als er een probleem is met de SD card tijdens opstart zal de LED "sos" knipperen in morse code: '... --- ...' en met een hogere lichtsterkte. 
 
@@ -102,12 +102,13 @@ Als het bord geconnecteerd is met de P1 poort op je digitale meter (zonder ook d
 
 ## Metingen bekijken 
 Als het bordje werkt zou je het moeten kunnen contacteren met je GSM, laptop of PC via een browser (bijvoorbeeld chrome) via HTTP. 
-Standaard is dat op http://192.168.0.250 of vervang hierin het IP adres dat je configureerde. 
+Standaard is dat op http://digimon.local 
 Je zou dan metingen moeten kunnen zien.
-Je moet ook wel geconnecteerd zijn op het zelfde thuis-netwerk. (Dat kan typische via kabel of een Wifi netwerk van je huis)  
 
-## Alternatieve Wifi configuratie
-Een alternatieve manier om de Wifi configuratie te doen is om het bordje te ontkoppelen zodat het niet werkt, er de micro SD card uit te halen, deze in een laptop/PC te steken (typisch met een adaptor; alsook niet elke laptop/PC heeft een SD card slot...). Je kan dan het config.json bestand wijzigen (of wegdoen). 
+> Je moet ook wel geconnecteerd zijn op het zelfde thuis-netwerk. Dat kan typische via kabel of een wifi netwerk van je huis.  
+
+## Alternatieve wifi configuratie
+Een alternatieve manier om de wifi configuratie te doen is om het bordje te ontkoppelen zodat het niet werkt, er de micro SD card uit te halen, deze in een laptop/PC te steken (typisch met een adaptor; alsook niet elke laptop/PC heeft een SD card slot...). Je kan dan het config.json bestand wijzigen (of wegdoen). 
 
 Het config.json bestand heeft het volgende formaat: 
 ````
@@ -129,6 +130,15 @@ Het config.json bestand heeft het volgende formaat:
 Wijzig dus wat je wil, sla op, ontkoppel de SD card proper van het besturing systeem van je laptop/PC en steek het kaartje weer in het bordje. 
 Koppel het bordje weer aan op de digitale meter OF via een USB kabel. 
 
+## Wifi configuratie wissen via de BOOT knop
+Als de monitor een wifi configuratie heeft en u wil die wissen kan je 20 seconden of de BOOT knop duwen van de boards. Als u lang genoeg duwt, begint de LED te knipperen. Er wordt in morse code "bye" geknipperd: '-... -.-- .'. Als u dit ziet los je direct de BOOT knop. 
+De monitor wist de wifi configuratie op de SD kaart en herstart na enige tijd.
+De monitor ziet dan geen wifi configuratie en zal dan in wifi configuratie mode opkomen. 
+
+> De boot knop methode werkt enkel als de wifi configuratie mode niet al actief is
+
+> Als je de boot knop blijft indrukken terwijl de monitor herstart, dan zal deze wachten om geprogrammeerd te worden... Onderbreek dan tijdelijk de P1 of USB kabel om hier uit te geraken.
+
 ## Debug de opstart met een seriele monitor
 Wanneer je nog problemen hebt met de opstart dan kan je de seriele monitor van Visual Studio Code met "Platform IO" extensie gebruiken om te zien wat het bord probeert te doen tijdens de opstart. 
 
@@ -149,7 +159,7 @@ De seriele monitoring ziet er bij een eerst opstart ongeveer alsvolgt uit:
   Serial pins used for communication to digital meter:
   RX1: 2, TX1: 0, RTS 8
   LittleFS Init OK
-  No prior WIFI config
+  No prior WiFi config
       Setup Mode
   --------------------------------
   SSID:
@@ -161,7 +171,7 @@ De pin waarden zullen verschillen per bord type.
 
 In dit voorbeeld start het bordje op in "configuratie mode" en maakt het bordje het "DigitaleMeterMonitor" netwerk hiervoor.  
 
-Wanneer de Wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
+Wanneer de wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
   ````
   Digital meter monitor using board: LilyGo TTGO T8 ESP32 C3 V1.1
   LED pin: 3
@@ -195,7 +205,7 @@ Wanneer de Wifi geconfigureerd is zou de opstart er alsvolgt moeten uitzien:
   --------------------------------
 ````
 
-Nadat het bord een eerste maal software en een filesystem image heeft gehad en kan connecteren op Wifi kan het worden geupgrade door te surfen naar:
+Nadat het bord een eerste maal software en een filesystem image heeft gehad en kan connecteren op wifi kan het worden geupgrade door te surfen naar:
 ````
 http://digimon.local/update
 ````
@@ -203,7 +213,6 @@ http://digimon.local/update
 Als gebruiker krijg je updates toegezonden met instucties die je via deze weg kan uploaden naar het bordje. 
 
 Als programeur kan je eigen builds maken van de code of van het filesysteem en deze op het bordje zetten op afstand. 
-
 
 # Web interface ontwikkeling
 De "data" folder bevat bestanden voor de web applicatie op het bordje.

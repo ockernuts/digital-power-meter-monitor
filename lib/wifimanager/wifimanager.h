@@ -21,38 +21,38 @@
 //      gives easier option to do debugging/reset/forces reconfig
 //   Hence we don't use the SDK SmartConfig....
 
-class MyWifiManager
+class MyWiFiManager
 {
 private:
-  static WifiConfigInfo wifiConfigInfo;
+  static WiFiConfigInfo wiFiConfigInfo;
   
   bool restartNeeded; // Set after in AP mode configuration is set.
   bool configPresent; // Set when an Wifi Config was persisted. 
-  unsigned long wifiConfigModeStart;
+  unsigned long wiFiConfigModeStart;
 
   AsyncWebServer& server;
   IDisplayer &displayer;
-  IWifiConfigPersistency &configPersistency; 
+  IWiFiConfigPersistency &configPersistency; 
 
 public:
-  MyWifiManager(AsyncWebServer& server, IDisplayer& displayer, IWifiConfigPersistency& configPersistency);
-  virtual ~MyWifiManager();
+  MyWiFiManager(AsyncWebServer& server, IDisplayer& displayer, IWiFiConfigPersistency& configPersistency);
+  virtual ~MyWiFiManager();
 
   bool Init();
 
 
   // Returns true if Wifi Reconfig is pending
   // Needs to be called from the main loop method to allow actions.
-  bool LoopWifiReconfigPending();
+  bool LoopWiFiReconfigPending();
 
   void PostWebServerStartSSDPInit();
 
-  static const char* GetWifiStatusAsString(wl_status_t status);
+  static const char* GetWiFiStatusAsString(wl_status_t status);
 
-  static String WifiSetupPageProcessor(const String& var);
+  static String WiFiSetupPageProcessor(const String& var);
 
 protected:
-  void SaveWifiConfig();
+  void SaveWiFiConfig();
   bool GetPreviousConfigAndValidateOrSetDefaults();
   bool AttemptAutoConnect();
   void InitFS();

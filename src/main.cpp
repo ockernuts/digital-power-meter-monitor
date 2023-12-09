@@ -23,12 +23,12 @@ PrintDisplayer displayer(Serial);
 PrintDisplayer displayer(Serial1);
 #endif
 
-// Choose Persistency layer for config -> something implementing IWifiConfigPersistency
+// Choose Persistency layer for config -> something implementing IWiFiConfigPersistency
 SDCardConfigPersistency configPersistency;
 
-// The wifi manager will help us with initial IP setup. 
+// The WiFi manager will help us with initial IP setup. 
 // It uses a "displayer" abstractor for its output
-MyWifiManager wifiManager(server, displayer, configPersistency); 
+MyWiFiManager wiFiManager(server, displayer, configPersistency); 
 
 
 void setup() {
@@ -68,10 +68,11 @@ void setup() {
 
   InitDsmrSerial();
   
-  if (!wifiManager.Init()) {
+  if (!wiFiManager.Init()) {
     g_led->cancel();
     morseOut(LED, "WiFi", LED_STRENGHT_ERROR);
-    // Init is not done... Wifi needs to be resetup through HTTP asynchronously.
+    // blink not working here for some reason ... // g_led->blink(500,500);
+    // Init is not done... WiFi needs to be resetup through HTTP asynchronously.
     // So we return earlier to the "loop", which will check that we are not running in normal mode and eventually
     // Reset the ESP after it has been reconfigurred.
     // THis due to async handlers for HTTP being handled otside of loop. 
@@ -87,7 +88,7 @@ void setup() {
   InitHttpHandlers(server);
   AsyncElegantOTA.begin(&server);
   server.begin();
-  wifiManager.PostWebServerStartSSDPInit();
+  wiFiManager.PostWebServerStartSSDPInit();
 
   displayer.newPage("Verbruiksmonitor");
 
@@ -102,10 +103,9 @@ void loop() {
   // animate led for normal operation, needs a fast loop. 
   loopLed();
 
-  if (wifiManager.LoopWifiReconfigPending())  {
-    g_led->blink(500,500);
+  if (wiFiManager.LoopWiFiReconfigPending())  {
     // It is not a good idea to animate things here with a delay,
-    // because the wifimanager needs to be able to answer DNS requests...
+    // because the WiFi manager needs to be able to answer DNS requests...
     return;
   }
 
