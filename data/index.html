@@ -164,9 +164,11 @@ function updateLegendLabel() {
           xAxis = this.xAxis,
           points = this.points,
           avg = 0,
-          counter = 0
+          counter = 0,
+          kWh = 0
 
-        this.yData.forEach(function(val) { counter++; avg += val; } );
+        
+        this.yData.forEach(function(val) { counter++; avg += val; kWh += val*5/3600000 } );
         if (counter != 0) {
           avg /= counter;
         } else {
@@ -186,7 +188,8 @@ function updateLegendLabel() {
         }
 
         return this.name + '<br>' + 'Laatst: ' + Math.abs(lastVal) + ' Watt<br>' +
-          '<span style="color: ' + color + '">Gem: ' + Math.abs(avg).toFixed(0) + ' Watt</span><br/>'
+          '<span style="color: ' + color + '">Gem: ' + Math.abs(avg).toFixed(0) + ' Watt</span><br/>' +
+          'Tot: ' + kWh.toFixed(3) + ' kWh'
       }
     }
   });
@@ -347,6 +350,7 @@ function retrieveQuarterValuesFromESP(pre_update=false) {
             chartT.series[1].addPoint([point_time, produced_power], false, false, false);
           }
         }
+        chartT.xAxis[0].setExtremes(quarter_date_time.getTime(), quarter_date_time.getTime() + 15*60*1000, false);     
         chartT.hideLoading();
         chartT.redraw(false); // false -> no animation. 
       }
@@ -362,7 +366,7 @@ function retrieveQuarterValuesFromESP(pre_update=false) {
 function getBaseUrl() {  
   root_part_of_url = window.location.origin
   if (window.location.origin.startsWith("http://localhost")) {
-    root_part_of_url = "http://192.168.0.250"
+    root_part_of_url = "http://powerbeesie.local"
   }
   return root_part_of_url;
 
