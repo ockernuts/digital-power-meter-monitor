@@ -390,7 +390,7 @@ void MyWiFiManager::PostWebServerStartSSDPInit() {
   SSDP.setName(wiFiConfigInfo.device_name);
   //set Serial Number
   //Null string if not set
-  //SSDP.setSerialNumber("001788102201");
+  SSDP.setSerialNumber(getSerialNo());
   //set device url
   //Null string if not set
   SSDP.setURL("index.html");
@@ -405,7 +405,7 @@ void MyWiFiManager::PostWebServerStartSSDPInit() {
   SSDP.setModelNumber(BOARD_NAME);
   //set model url
   //Null string if not set
-  //SSDP.setModelURL("http://www.meethue.com");
+  SSDP.setModelURL("https://github.com/ockernuts/digital-power-meter-monitor");
   //set model manufacturer name
   //Null string if not set
   SSDP.setManufacturer("Ockernuts");
@@ -421,7 +421,7 @@ void MyWiFiManager::PostWebServerStartSSDPInit() {
   //set UUID, you can use https://www.uuidgenerator.net/
   //use 38323636-4558-4dda-9188-cda0e6 + 4 last bytes of mac address if not set
   //use SSDP.setUUID("daa26fa3-d2d4-4072-bc7a-a1b88ab4234a", false); for full UUID
-  //SSDP.setUUID("daa26fa3-d2d4-4072-bc7a");
+  SSDP.setUUID("38323636-4558-4dda-9188-cda0e6");
   //Set icons list, NB: optional, this is ignored under windows
   SSDP.setIcons(  "<icon>"
                   "<mimetype>image/png</mimetype>"

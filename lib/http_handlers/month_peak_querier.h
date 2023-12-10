@@ -17,20 +17,14 @@
 class MonthPeakQuerier {
     AsyncWebServer& server;
     const FixedQuarterPowerHistoryAccumulator& watt_history;
-    const char *user;
-    const char *password; 
     
 public:
     MonthPeakQuerier(AsyncWebServer& server, 
-                     const FixedQuarterPowerHistoryAccumulator& watt_history,
-                     const char *user, const char* password)  : 
-      server(server), watt_history(watt_history), user(user), password(password) {}
+                     const FixedQuarterPowerHistoryAccumulator& watt_history)  : 
+      server(server), watt_history(watt_history) {}
 
     void Init() {
         server.on("/current/month/peak", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            if (!request->authenticate(this->user, this->password)) {
-                request->requestAuthentication(realm);
-            }
             AsyncResponseStream *response = request->beginResponseStream("application/json");
             StaticJsonDocument<256> doc;
 
@@ -61,5 +55,5 @@ public:
 };
 
 
-extern MonthPeakQuerier& GetMonthPeakQuerier(AsyncWebServer& server, const char *user, const char *pwd);
+extern MonthPeakQuerier& GetMonthPeakQuerier(AsyncWebServer& server);
 #endif 

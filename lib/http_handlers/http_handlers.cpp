@@ -6,41 +6,26 @@
 
 const char *realm = "Digitale Meter Monitor";
 
-void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *password) {
+void InitHttpHandlers(AsyncWebServer &server) {
   //if you get here you have connected to the WiFi and you know the time !
   // Start WEBSERVER + Handler ?
-  server.on("/", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-    if (!request->authenticate(user, password, realm)) {
-      request->requestAuthentication(realm);
-    }
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/index.html");
   });
-  server.on("/index.html", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-    if (!request->authenticate(user, password, realm)) {
-      request->requestAuthentication(realm);
-    }
+  server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/index.html");
    });
-  server.on("/favicon.ico", HTTP_GET, [user, password](AsyncWebServerRequest *request){
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
      request->send(LittleFS, "/favicon.ico");
   });
   
-  server.on("/dark-unica.js", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-    if (!request->authenticate(user, password, realm)) {
-      request->requestAuthentication(realm);
-    }
+  server.on("/dark-unica.js", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/dark-unica.js");
   });
-  server.on("/style.css", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-    if (!request->authenticate(user, password, realm)) {
-      request->requestAuthentication(realm);
-    }
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/style.css");
   });
-  server.on("/watt", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-    if (!request->authenticate(user, password, realm)) {
-      request->requestAuthentication(realm);
-    }
+  server.on("/watt", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", String(GetFixedQuarterPowerHistoryAccumulator().GetCurrentWattsHistorySample().GetConsumedPowerAverage()).c_str());
   });
   // This is only possible because we wrapped the SdFat in an FS adapter...(and File adapter)
@@ -50,10 +35,7 @@ void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *pass
       request->send(404, "text/plain", "Item not found");
     });
 
-  server.on("/historic/years", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-      if (!request->authenticate(user, password, realm)) {
-        request->requestAuthentication(realm);
-      }
+  server.on("/historic/years", HTTP_GET, [](AsyncWebServerRequest *request){
       AsyncResponseStream *response = request->beginResponseStream("application/json");
       StaticJsonDocument<768> doc;
       JsonObject years_holder = doc.to<JsonObject>();
@@ -62,10 +44,7 @@ void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *pass
       request->send(response);
     });
   
-  server.on("/historic/months", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-      if (!request->authenticate(user, password, realm)) {
-        request->requestAuthentication(realm);
-      }
+  server.on("/historic/months", HTTP_GET, [](AsyncWebServerRequest *request){
       AsyncWebParameter* year_param = request->getParam("year");
       if (!year_param) {
         return request->send(400, "text/plain", F("ERROR: Need a year argument"));
@@ -80,10 +59,7 @@ void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *pass
       request->send(response);
     });
   
-  server.on("/historic/days", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-      if (!request->authenticate(user, password, realm)) {
-        request->requestAuthentication(realm);
-      }
+  server.on("/historic/days", HTTP_GET, [](AsyncWebServerRequest *request){
       AsyncWebParameter* year_param = request->getParam("year");
       if (!year_param) {
         return request->send(400, "text/plain", F("ERROR: Need a year argument"));
@@ -104,10 +80,7 @@ void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *pass
       request->send(response);
     });
 
-  server.on("/historic/quarters", HTTP_GET, [user, password](AsyncWebServerRequest *request){
-      if (!request->authenticate(user, password, realm)) {
-        request->requestAuthentication(realm);
-      }
+  server.on("/historic/quarters", HTTP_GET, [](AsyncWebServerRequest *request){
       AsyncWebParameter* year_param = request->getParam("year");
       if (!year_param) {
         return request->send(400, "text/plain", F("ERROR: Need a year argument"));
@@ -135,6 +108,6 @@ void InitHttpHandlers(AsyncWebServer &server, const char *user, const char *pass
     });
   
 
-  GetJsonQuarterQuerier(server, user, password).Init();
-  GetMonthPeakQuerier(server, user, password).Init();
+  GetJsonQuarterQuerier(server).Init();
+  GetMonthPeakQuerier(server).Init();
 }

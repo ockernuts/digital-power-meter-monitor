@@ -14,6 +14,7 @@
 #include <ezLED.h>
 #include "sdcardconfigpersistency.h"
 
+
 AsyncWebServer server(80);
 
 #if PROGRAM_MAIN_OUTPUT == OUTPUT_TYPE_SERIAL
@@ -37,11 +38,16 @@ void setup() {
   setLedOff(false, 1000, LED_STRENGHT_STARTUP);
   // Send 'Hello' in morse. This also gives time for the monitorring pc can open the serial port. 
   morseOut(LED, "Hi"); // .... ..
-   
+
+  initUniqueId();
+ 
   // Only after 3 seconds, show info. 
   Serial.printf("Digital meter monitor using board: %s\n", BOARD_NAME);
+  Serial.printf("Id: %s\n", getUniqueId());
   Serial.printf("Firmware version: %s\n", AUTO_VERSION);
   Serial.printf("Build date: %s\n", __TIMESTAMP__);
+
+  
   Serial.printf("LED pin: %d\n", LED);
 
 #ifdef TTGO_T8_ESP32_S2  
@@ -72,7 +78,10 @@ void setup() {
   if (!wiFiManager.Init()) {
     g_led->cancel();
     morseOut(LED, "WiFi", LED_STRENGHT_ERROR);
-    // blink not working here for some reason ... // g_led->blink(500,500);
+    g_led->turnON();
+    // blink not working here for some reason ...
+    g_led->blink(500,500);
+    
     // Init is not done... WiFi needs to be resetup through HTTP asynchronously.
     // So we return earlier to the "loop", which will check that we are not running in normal mode and eventually
     // Reset the ESP after it has been reconfigurred.
@@ -86,7 +95,7 @@ void setup() {
   sdCardLogStartup();
 
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-  InitHttpHandlers(server, wiFiManager.GetSSID(), wiFiManager.GetPassword());
+  InitHttpHandlers(server);
   AsyncElegantOTA.begin(&server, wiFiManager.GetSSID(), wiFiManager.GetPassword());
   server.begin();
   wiFiManager.PostWebServerStartSSDPInit();

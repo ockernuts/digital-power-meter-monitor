@@ -121,3 +121,7 @@ extern void setLedOff(bool async=true, int animation_time=LED_ANIMATION_TIME_IN_
 extern void morseOut(int pin, const char * text, int strenght=LED_STRENGHT_STARTUP);
 
 extern ezLED* g_led; 
+
+extern void initUniqueId();
+extern const char* getUniqueId();
+extern const char * getSerialNo();

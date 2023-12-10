@@ -16,19 +16,13 @@
 class JsonQuarterQuerier {
     AsyncWebServer& server;
     JsonQuarterInfoCreator& quarter_info_creator;
-    const char *user;
-    const char *password; 
     
 public:
-    JsonQuarterQuerier(AsyncWebServer& server, JsonQuarterInfoCreator& quarter_info_creator,
-                       const char *user, const char *password )  : 
-      server(server), quarter_info_creator(quarter_info_creator), user(user), password(password) {}
+    JsonQuarterQuerier(AsyncWebServer& server, JsonQuarterInfoCreator& quarter_info_creator)  : 
+      server(server), quarter_info_creator(quarter_info_creator) {}
 
     void Init() {
         server.on("/current/quarter", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            if (!request->authenticate(this->user, this->password)) {
-                request->requestAuthentication(realm);
-            }
             AsyncResponseStream *response = request->beginResponseStream("application/json");
             DynamicJsonDocument doc(6144); // We could not use a StaticJsonDocument of this size, since it ruïnes the limited stack (4KB) on the ESP8266
             JsonObject root = doc.to<JsonObject>();
@@ -39,6 +33,6 @@ public:
     }
 };
 
-extern JsonQuarterQuerier& GetJsonQuarterQuerier(AsyncWebServer& server, const char *user, const char *pwd);
+extern JsonQuarterQuerier& GetJsonQuarterQuerier(AsyncWebServer& server);
 
 #endif 

@@ -1,5 +1,29 @@
 #include "hardware_and_pins.h"
+#include "esp_efuse.h"
+#include "esp_efuse_table.h"
 
+uint16_t id[8];
+char unique_id[40] = "Unknown";
+char serial[32]= "Unknown";
+
+void initUniqueId() {
+  memset(id, 0, sizeof(id));
+  if (ESP_OK != esp_efuse_read_field_blob(ESP_EFUSE_OPTIONAL_UNIQUE_ID, id, sizeof(id))) {
+    Serial.println("Could not read ESP32 optional unique ID");
+  } else {
+    // format as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+    snprintf(unique_id, sizeof(unique_id), "%04X%04X-%04X-%04X-%04X-%04X%04X%04X", id[7], id[6], id[5], id[4], id[3], id[2], id[1], id[0]);
+    snprintf(serial, sizeof(serial), "%04X%04X%04X%04X%04X%04X%04X", id[6], id[5], id[4], id[3], id[2], id[1], id[0]);
+  }
+}
+
+const char * getUniqueId() {
+    return unique_id; 
+}
+
+const char * getSerialNo() {
+    return serial; 
+}
 HardwareSerial& GetDsmrSerial() {
     static HardwareSerial DsmrSerial(DSMR_UART);
     return DsmrSerial; 

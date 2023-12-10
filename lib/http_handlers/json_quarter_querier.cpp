@@ -1,6 +1,6 @@
 #include "json_quarter_querier.h"
 
-JsonQuarterQuerier& GetJsonQuarterQuerier(AsyncWebServer& server, const char *user, const char *pwd) {
-    static JsonQuarterQuerier jsonQuarterQuerier(server, GetJsonQuarterInfoCreator(), user, pwd);
+JsonQuarterQuerier& GetJsonQuarterQuerier(AsyncWebServer& server) {
+    static JsonQuarterQuerier jsonQuarterQuerier(server, GetJsonQuarterInfoCreator());
     return jsonQuarterQuerier;
 }
