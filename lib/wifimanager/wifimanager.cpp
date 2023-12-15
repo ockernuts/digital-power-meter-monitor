@@ -396,13 +396,13 @@ void MyWiFiManager::PostWebServerStartSSDPInit() {
   SSDP.setURL("index.html");
   //set model name
   //Null string if not set
-  SSDP.setModelName("Digitale Meter Monitor");
+  SSDP.setModelName(BOARD_NAME);
   //set model description
   //Null string if not set
-  SSDP.setModelDescription("This device can be controled by WiFi");
+  SSDP.setModelDescription("Digitale Meter Monitor");
   //set model number
   //Null string if not set
-  SSDP.setModelNumber(BOARD_NAME);
+  SSDP.setModelNumber(AUTO_VERSION);
   //set model url
   //Null string if not set
   SSDP.setModelURL("https://github.com/ockernuts/digital-power-meter-monitor");
