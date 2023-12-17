@@ -9,14 +9,25 @@ namespace dsmr {
 }
 
 
-struct P1Data {
+class P1Data {
+public:
   int watts_consumed = 0;
   int watts_produced = 0;
+  int consumed_wh = 0;
+  int produced_wh = 0;
   struct tm monthly_peak_timestamp = {};
   int monthly_peak_watts = 0;
   struct tm message_timestamp = {};
+
+  int get_consumed_wh() const {
+    return consumed_wh;
+  }
+
+  int get_produced_wh() const {
+    return produced_wh;
+  }
 };
 
 extern P1Reader& GetP1Reader();
 
-extern bool ProcessP1ReaderResults(struct P1Data& data);
+extern bool ProcessP1ReaderResults(P1Data& data);

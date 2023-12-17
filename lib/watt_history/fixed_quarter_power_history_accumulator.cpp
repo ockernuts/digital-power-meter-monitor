@@ -48,8 +48,8 @@ void FixedQuarterPowerHistoryAccumulator::ResetAccumulationIntervalValues() {
   produced_watt_sum_in_accumulation_interval = 0;
 }
 
-void FixedQuarterPowerHistoryAccumulator::ResetQuarterValues(int quarter_of_the_hour) {
-  array_per_quarter_samples[quarter_of_the_hour] = WattHistorySamples();
+void FixedQuarterPowerHistoryAccumulator::ResetQuarterValues(int quarter_of_the_hour, int consumed_wh, int produced_wh) {
+  array_per_quarter_samples[quarter_of_the_hour] = WattHistorySamples(consumed_wh, produced_wh);
   watt_limits.peak_watts = 0;
   watt_limits.min_watts = 0;
 }
@@ -78,7 +78,7 @@ const WattHistorySamples* FixedQuarterPowerHistoryAccumulator::GetCurrentWattHis
 }
 
 
-void FixedQuarterPowerHistoryAccumulator::ProcessNewSample(struct P1Data& data) {
+void FixedQuarterPowerHistoryAccumulator::ProcessNewSample(P1Data& data) {
   // Store month readings first
   month_quarter_peak_power = data.monthly_peak_watts;
   month_quarter_peak_id = QuarterIndicator(data.monthly_peak_timestamp).GetLocalQuarterId();
@@ -94,7 +94,7 @@ void FixedQuarterPowerHistoryAccumulator::ProcessNewSample(struct P1Data& data) 
     }
     // initialization clearly needed
     storing_for_quarter = current_quarter_indicator;
-    ResetQuarterValues(current_quarter_in_the_hour);
+    ResetQuarterValues(current_quarter_in_the_hour, data.get_consumed_wh(), data.get_produced_wh());
     ResetAccumulationIntervalValues();
   }
 
@@ -104,6 +104,13 @@ void FixedQuarterPowerHistoryAccumulator::ProcessNewSample(struct P1Data& data) 
     storing_for_interval_in_quarter_index = current_interval_in_quarter;
   }
 
+  // Why don't we take the current Wh - last known / time factors ? 
+  // --> The Wh resolution is not good enough...
+  // 1 W over 1 second = 1/3600 Wh for that seconds... this only starts at the 4th decimal...
+  // So converting back whole Wh to W for second ranges. Gives big Watt jumps. 
+  // As such we use current Watt samples and "extrapolate" + average them out. 
+  // We will store the begin Wh values only for bigger reports (day/ month)
+  
   // Accumulate
   consumed_watt_sum_in_accumulation_interval += data.watts_consumed;
   consumed_watt_samples_in_accumulation_interval++;

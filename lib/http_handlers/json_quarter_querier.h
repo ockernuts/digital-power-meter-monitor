@@ -24,7 +24,7 @@ public:
     void Init() {
         server.on("/current/quarter", HTTP_GET, [this](AsyncWebServerRequest *request) {
             AsyncResponseStream *response = request->beginResponseStream("application/json");
-            DynamicJsonDocument doc(6144); // We could not use a StaticJsonDocument of this size, since it ruïnes the limited stack (4KB) on the ESP8266
+            DynamicJsonDocument doc(QUARTER_SAMPLES_JSON_SIZE); // We could not use a StaticJsonDocument of this size, since it ruïnes the limited stack (4KB) on the ESP8266
             JsonObject root = doc.to<JsonObject>();
             quarter_info_creator.FillJsonObjectForLastQuarterQueryResult(root);
             serializeJson(root, *response);

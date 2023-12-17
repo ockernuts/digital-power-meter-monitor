@@ -145,7 +145,7 @@ void writeQuarterDataToFile(const QuarterIndicator& quarterId, const WattHistory
     // TODO how to say something about this.
     return; 
   }
-  DynamicJsonDocument doc(6144); // We could not use a StaticJsonDocument of this size, since it ruïnes the limited stack (4KB) on the ESP8266
+  DynamicJsonDocument doc(QUARTER_SAMPLES_JSON_SIZE); // We could not use a StaticJsonDocument of this size, since it ruïnes the limited stack (4KB) on the ESP8266
   JsonObject root = doc.to<JsonObject>();
   GetJsonQuarterInfoCreator().FillJsonObjectForQuarterWattHistorySamples(root, quarterId, samples);
   serializeJson(doc, f);

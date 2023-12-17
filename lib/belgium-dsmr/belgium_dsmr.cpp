@@ -10,6 +10,10 @@ constexpr char month_quarterly_peak::name_progmem[];
 using MyData = ParsedData<
   /* String */     timestamp,
   /* String */     identification,
+  /* FixedValue */ energy_delivered_tariff1,
+  /* FixedValue */ energy_delivered_tariff2,
+  /* FixedValue */ energy_returned_tariff1,
+  /* FixedValue */ energy_returned_tariff2,
   /* FixedValue */ power_delivered,
   /* FixedValue */ power_returned,
   /* String */     month_quarterly_peak
@@ -46,7 +50,7 @@ const char *getWeekday(const struct tm* tm_time) {
   return dutch_weekdays[tm_time->tm_wday];
 }
 
-bool ProcessP1ReaderResults(struct P1Data& returned_data) {
+bool ProcessP1ReaderResults(P1Data& returned_data) {
   P1Reader& p1_reader  = GetP1Reader();
   if (!p1_reader.loop()) {
     return false; 
@@ -70,6 +74,8 @@ bool ProcessP1ReaderResults(struct P1Data& returned_data) {
   returned_data.watts_consumed = data.power_delivered.int_val(); // @suppress("Method cannot be resolved")
   returned_data.watts_produced = -data.power_returned.int_val();  // @suppress("Method cannot be resolved")
   returned_data.monthly_peak_watts = data.month_quarterly_peak.int_val();
+  returned_data.consumed_wh = data.energy_delivered_tariff1.int_val() + data.energy_delivered_tariff2.int_val();
+  returned_data.produced_wh = data.energy_returned_tariff1.int_val() + data.energy_returned_tariff2.int_val();
 
   if (!dsmr_parse_datetime( data.month_quarterly_peak.timestamp.c_str() , &returned_data.monthly_peak_timestamp)) {
     p1_reader.enable(true);

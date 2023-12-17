@@ -134,9 +134,14 @@ public:
 
 class WattHistorySamples {
 	WattHistorySample array_watt_history_samples[WATT_HISTORY_SAMPLES];
+	int quarter_begin_consumed_wh;
+	int quarter_begin_produced_wh; 
+	
 
 public: 
-	WattHistorySamples() {
+	WattHistorySamples(int consumed_wh=0, int produced_wh=0) {
+		quarter_begin_consumed_wh = consumed_wh;
+		quarter_begin_produced_wh = produced_wh;
 		for (int i = 0; i< WATT_HISTORY_SAMPLES; i++) {
 			array_watt_history_samples[i] = WattHistorySample();
 		}
@@ -185,6 +190,29 @@ public:
 		}
 		if (valid_values == 0) return 0; 
 		return watt_sum / valid_values;
+	}
+
+	int GetBeginConsumedWattHours() const {
+		return quarter_begin_consumed_wh;
+	}
+
+	int GetEstimatedConsumedWattHoursOverRunningQuarter() const {
+		int avg_watts = GetAverageProducedWatts();
+		int last_good_sample_index = -1; 
+		for (int i = 0; i< WATT_HISTORY_SAMPLES; i++) {
+			const WattHistorySample& sample = array_watt_history_samples[i];
+			if (!sample.HasValue()) continue;
+			last_good_sample_index = i; 
+		}
+
+		if (last_good_sample_index == -1) return 0;
+		int wh = (avg_watts * 5 * (last_good_sample_index+1)) / 3600;
+		return wh;
+	}
+
+
+	int GetBeginProducedWattHours() const {
+		return quarter_begin_produced_wh;
 	}
 
 };
@@ -247,7 +275,7 @@ public:
 
 	void ResetAccumulationIntervalValues();
 
-	void ResetQuarterValues(int quarter_of_the_hour);
+	void ResetQuarterValues(int quarter_of_the_hour, int begin_consumed_wh, int begin_produced_wh);
 
 	int GetIntervalInQuarter(const tm& tm_now) const;
 

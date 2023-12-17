@@ -13,6 +13,9 @@
 #include <Print.h>
 
 
+#define QUARTER_SAMPLES_JSON_SIZE 6300
+
+
 class JsonQuarterInfoCreator {
 private: 
     const FixedQuarterPowerHistoryAccumulator& watt_history;
@@ -38,6 +41,8 @@ public:
     void FillJsonObjectForQuarterWattHistorySamples(JsonObject& quarterJson, const QuarterIndicator& quarterId, const WattHistorySamples& samples) {
         quarterJson["quarter_id"] = quarterId.GetLocalQuarterId();
         quarterJson["consumed_power_avg"] = samples.GetAverageConsumedWatts();
+        quarterJson["begin_consumed_wh"] = samples.GetBeginConsumedWattHours();
+        quarterJson["begin_produced_wh"] = samples.GetBeginProducedWattHours();
         quarterJson["interval_secs"] = 5;
     
         JsonArray quarter_consumed_power_interval_avgs = quarterJson.createNestedArray("consumed_power_interval_avgs");
